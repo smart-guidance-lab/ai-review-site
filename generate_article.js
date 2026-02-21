@@ -6,24 +6,19 @@ async function generateArticle() {
     const tools = ['ChatGPT-5', 'Claude 4', 'Midjourney v7', 'Gemini 2.0 Ultra', 'Copilot Pro', 'Sora', 'Perplexity Pro'];
     const tool = tools[Math.floor(Math.random() * tools.length)];
     
-    // プロンプトを極限まで洗練：記号、テーブル、太字を禁止
-    const prompt = `Write a professional AI tool review in English for ${tool}. 
-    Follow this strict structure:
-    # [Title]
-    ## Introduction
-    Write a brief overview.
-    ## Key Advantages
-    List 3 specific benefits without using symbols, bold text, or tables.
-    ## Potential Drawbacks
-    List 3 specific limitations without using symbols, bold text, or tables.
-    ## Final Verdict
-    Provide a clear conclusion in one paragraph.
-    
-    CRITICAL: Do NOT use "**", "PROS", "CONS", or Markdown tables. Use only plain text under headings.`;
+    // AI臭い「太字」や「表」を禁止し、エッセイ形式で書かせるプロンプト
+    const prompt = `Write a deep-dive, professional tech analysis for a high-end magazine. 
+    Topic: ${tool}. 
+    Style Guidelines:
+    - NO Markdown tables. NO excessive bolding.
+    - Use clear, sophisticated headings (# and ## only).
+    - Focus on nuanced perspectives: "The Silver Lining" (Pros) and "The Hidden Friction" (Cons) woven into paragraphs.
+    - Write like a human expert: slightly critical, insightful, and forward-looking.
+    - Language: British English for a sophisticated tone.`;
 
     const data = JSON.stringify({
         model: "gpt-4o",
-        messages: [{role: "user", content: prompt}],
+        messages: [{role: "system", content: "You are a senior tech editor at a prestigious global journal. You avoid AI cliches like 'In conclusion' or 'Unlock your potential'."}, {role: "user", content: prompt}],
         max_tokens: 1200
     });
 
@@ -48,7 +43,7 @@ async function generateArticle() {
                 const blogDir = path.join(process.cwd(), 'content/posts');
                 if (!fs.existsSync(blogDir)) fs.mkdirSync(blogDir, { recursive: true });
                 fs.writeFileSync(path.join(blogDir, `ai-article-${timestamp}.md`), content);
-                console.log('Successfully generated content.');
+                console.log('Content generated with editorial standards.');
                 updateSitemap();
             } catch (e) { console.error('API Error'); }
         });
