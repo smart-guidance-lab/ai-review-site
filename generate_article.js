@@ -31,7 +31,8 @@ async function generateArticle() {
                 const response = JSON.parse(body);
                 const content = response.choices[0].message.content;
                 const timestamp = Date.now();
-                const blogDir = path.join(process.cwd(), 'app/blog');
+                // 保存先を content/posts に修正
+                const blogDir = path.join(process.cwd(), 'content/posts');
                 if (!fs.existsSync(blogDir)) fs.mkdirSync(blogDir, { recursive: true });
                 fs.writeFileSync(path.join(blogDir, `ai-article-${timestamp}.md`), content);
                 console.log('Successfully generated content.');
@@ -46,7 +47,7 @@ async function generateArticle() {
 
 function updateSitemap() {
     const baseUrl = 'https://ai-review-site-nine.vercel.app';
-    const blogDir = 'app/blog';
+    const blogDir = 'content/posts'; // ここを修正
     if (!fs.existsSync(blogDir)) return;
     const files = fs.readdirSync(blogDir).filter(f => f.endsWith('.md'));
     let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
