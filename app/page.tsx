@@ -2,11 +2,11 @@ import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
 
-// ビルド時（デプロイ時）にファイルを確定させる静的生成（SSG）へ移行
 export const revalidate = false; 
 
 export default function Home() {
-  const blogDir = path.join(process.cwd(), 'app', 'blog');
+  // 読み込み先を content/posts に修正
+  const blogDir = path.join(process.cwd(), 'content', 'posts');
   let articles = [];
 
   if (fs.existsSync(blogDir)) {
@@ -17,11 +17,10 @@ export default function Home() {
       const content = fs.readFileSync(path.join(blogDir, file), 'utf8');
       const titleMatch = content.match(/^#\s+(.*)/m);
       const displayTitle = titleMatch ? titleMatch[1] : slug;
-      // タイムスタンプをファイル名から抽出してソート用に保持（ai-article-12345.md）
       const timestamp = parseInt(file.split('-').pop()?.replace('.md', '') || '0');
       
       return { slug, displayTitle, timestamp };
-    }).sort((a, b) => b.timestamp - a.timestamp); // 最新順にソート
+    }).sort((a, b) => b.timestamp - a.timestamp);
   }
 
   return (
@@ -39,7 +38,7 @@ export default function Home() {
             {articles.map(article => (
               <li key={article.slug} style={{ marginBottom: '2rem' }}>
                 <Link href={`/blog/${article.slug}`} style={{ color: '#000', textDecoration: 'none', borderLeft: '5px solid #0070f3', paddingLeft: '1rem', display: 'block' }}>
-                  <h2 style={{ fontSize: '1.8rem', margin: 0, transition: '0.2s' }}>{article.displayTitle}</h2>
+                  <h2 style={{ fontSize: '1.8rem', margin: 0 }}>{article.displayTitle}</h2>
                   <span style={{ fontSize: '0.9rem', color: '#888' }}>Read Full Analysis &rarr;</span>
                 </Link>
               </li>
