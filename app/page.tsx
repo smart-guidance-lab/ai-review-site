@@ -2,10 +2,9 @@ import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
 
-export const revalidate = false; 
+export const revalidate = 0; // 常に最新を反映
 
 export default function Home() {
-  // 読み込み先を content/posts に修正
   const blogDir = path.join(process.cwd(), 'content', 'posts');
   let articles = [];
 
@@ -16,42 +15,39 @@ export default function Home() {
       const slug = file.replace('.md', '');
       const content = fs.readFileSync(path.join(blogDir, file), 'utf8');
       const titleMatch = content.match(/^#\s+(.*)/m);
-      const displayTitle = titleMatch ? titleMatch[1] : slug;
-      const timestamp = parseInt(file.split('-').pop()?.replace('.md', '') || '0');
+      const displayTitle = titleMatch ? titleMatch[1] : slug.replace(/-/g, ' ').toUpperCase();
+      const timestamp = parseInt(file.split('-').pop() || '0');
       
       return { slug, displayTitle, timestamp };
     }).sort((a, b) => b.timestamp - a.timestamp);
   }
 
   return (
-    <main style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', fontFamily: 'system-ui, sans-serif', lineHeight: '1.6' }}>
-      <header style={{ borderBottom: '4px solid #000', marginBottom: '3rem', paddingBottom: '1rem' }}>
-        <h1 style={{ fontSize: '3rem', fontWeight: '800', textTransform: 'uppercase', marginBottom: '0.5rem' }}>AI INSIGHT GLOBAL</h1>
-        <p style={{ fontSize: '1.2rem', color: '#444' }}>Deep Dive into the AI Evolution. {articles.length} Exclusive Reports.</p>
+    <main style={{ padding: '3rem 1.5rem', maxWidth: '900px', margin: '0 auto', fontFamily: '"Inter", system-ui, sans-serif', backgroundColor: '#fafafa', minHeight: '100vh' }}>
+      <header style={{ textAlign: 'center', marginBottom: '4rem', borderBottom: '2px solid #000', paddingBottom: '2rem' }}>
+        <h1 style={{ fontSize: '3.5rem', fontWeight: '900', letterSpacing: '-2px', margin: 0, color: '#000' }}>AI INSIGHT GLOBAL</h1>
+        <p style={{ fontSize: '1.1rem', color: '#666', marginTop: '1rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
+          Intelligence for the Artificial Era — {articles.length} Reports
+        </p>
       </header>
 
-      <section>
-        {articles.length === 0 ? (
-          <p>Scanning the latest AI developments... Please check back in a few minutes.</p>
-        ) : (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {articles.map(article => (
-              <li key={article.slug} style={{ marginBottom: '2rem' }}>
-                <Link href={`/blog/${article.slug}`} style={{ color: '#000', textDecoration: 'none', borderLeft: '5px solid #0070f3', paddingLeft: '1rem', display: 'block' }}>
-                  <h2 style={{ fontSize: '1.8rem', margin: 0 }}>{article.displayTitle}</h2>
-                  <span style={{ fontSize: '0.9rem', color: '#888' }}>Read Full Analysis &rarr;</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-      
-      <footer style={{ marginTop: '6rem', borderTop: '1px solid #eee', paddingTop: '2rem', textAlign: 'center' }}>
-        <p style={{ color: '#999' }}>&copy; 2026 AI Insight Global. All intelligence verified.</p>
-        <div style={{ background: '#f9f9f9', padding: '1rem', borderRadius: '8px', fontSize: '0.85rem' }}>
-          <strong>[AD]</strong> Looking for edge in AI? <a href="#" style={{ color: '#0070f3' }}>Get our Master Intelligence Kit.</a>
-        </div>
+      <div style={{ display: 'grid', gap: '2rem' }}>
+        {articles.map(article => (
+          <Link key={article.slug} href={`/blog/${article.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <section style={{ backgroundColor: '#fff', padding: '2rem', borderRadius: '16px', border: '1px solid #eee', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'pointer' }} 
+              onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.shadow = '0 10px 30px rgba(0,0,0,0.1)'; }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '800', margin: '0 0 1rem 0', color: '#1a1a1a', lineHeight: '1.2' }}>{article.displayTitle}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ color: '#0070f3', fontWeight: 'bold', fontSize: '0.9rem' }}>READ ANALYSIS &rarr;</span>
+                <span style={{ color: '#ccc', fontSize: '0.8rem' }}>REPORT #{article.slug.split('-').pop()?.slice(-4)}</span>
+              </div>
+            </section>
+          </Link>
+        ))}
+      </div>
+
+      <footer style={{ marginTop: '6rem', textAlign: 'center', borderTop: '1px solid #eee', paddingTop: '3rem' }}>
+        <p style={{ color: '#999', fontSize: '0.9rem' }}>&copy; 2026 AI Insight Global. Content generated via autonomous intelligence.</p>
       </footer>
     </main>
   );
