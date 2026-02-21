@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Review Site", // ここは適宜変更可能
+  title: "AI INSIGHT GLOBAL | World's Leading AI Reviews", // ここは適宜変更可能
   description: "24時間自動更新される最新AIツールレビューサイト",
   verification: {
     google: "n2V60v_i47eXrWEGYi1WRTrD9-tidkXkJhrbjDgTkXU",
