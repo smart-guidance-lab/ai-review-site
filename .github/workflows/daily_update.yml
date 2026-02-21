@@ -2,14 +2,14 @@ name: Generate Daily AI Review
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 毎日日本時間午前9時に実行
-  workflow_dispatch: # 手動実行用
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # GitHubへの書き込み権限を許可
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,13 +25,15 @@ jobs:
       - name: Generate article with AI
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: node generate_article.js
+        run: |
+          mkdir -p data # フォルダがなければ作成
+          node generate_article.js
 
       - name: Commit and Push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add data/articles.json public/sitemap.xml
+          git add -A # 変更があったすべてのファイルを対象にする
           git commit -m "Auto: Update articles and sitemap [skip ci]" || echo "No changes to commit"
           git push
 
