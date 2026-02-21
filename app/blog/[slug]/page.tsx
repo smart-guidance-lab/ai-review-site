@@ -15,74 +15,63 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   const filePath = path.join(process.cwd(), 'content', 'posts', `${slug}.md`);
 
   if (!fs.existsSync(filePath)) notFound();
+
   const content = fs.readFileSync(filePath, 'utf8');
 
-  // Markdownの行をパースして装飾する関数
-  const renderContent = (text: string) => {
-    return text.split('\n').map((line, i) => {
-      // 見出しの処理
-      if (line.startsWith('# ')) return <h1 key={i} style={{ fontSize: '3rem', fontWeight: '900', marginBottom: '2rem', lineHeight: '1.1', color: '#111' }}>{line.replace('# ', '')}</h1>;
-      if (line.startsWith('## ')) return <h2 key={i} style={{ fontSize: '1.8rem', fontWeight: '700', marginTop: '3.5rem', marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>{line.replace('## ', '')}</h2>;
-      
-      // 表（Pros/Cons）をカード形式に変換する特殊ロジック
-      if (line.includes('|')) {
-        const cells = line.split('|').map(c => c.trim()).filter(c => c !== '');
-        if (cells.length >= 2 && !line.includes('---')) {
-          const isPros = line.toLowerCase().includes('pros') || line.toLowerCase().includes('advantage');
-          return (
-            <div key={i} style={{ 
-              display: 'inline-block', width: '48%', minWidth: '300px', verticalAlign: 'top',
-              margin: '1%', padding: '1.5rem', borderRadius: '12px', 
-              backgroundColor: isPros ? '#f0fff4' : '#fff5f5',
-              borderLeft: `5px solid ${isPros ? '#48bb78' : '#f56565'}`,
-              boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-            }}>
-              <strong style={{ display: 'block', marginBottom: '0.5rem', color: isPros ? '#2f855a' : '#c53030' }}>
-                {isPros ? '▲ PROS / BENEFITS' : '▼ CONS / LIMITATIONS'}
-              </strong>
-              <div style={{ fontSize: '0.95rem' }}>{line.replace(/.*\|/,'').trim()}</div>
-            </div>
-          );
-        }
-        return null;
-      }
-
-      // 通常のテキスト
-      return <p key={i} style={{ marginBottom: '1.5rem', color: '#333', fontSize: '1.125rem', fontWeight: '400' }}>{line}</p>;
-    });
-  };
+  // セクション解析ロジック
+  const lines = content.split('\n');
+  const renderedContent = lines.map((line, i) => {
+    // 1. タイトル (H1)
+    if (line.startsWith('# ')) {
+      return <h1 key={i} style={{ fontSize: '3rem', fontWeight: '900', marginBottom: '2rem', letterSpacing: '-1.5px', lineHeight: '1.1' }}>{line.replace('# ', '')}</h1>;
+    }
+    // 2. 小見出し (H2)
+    if (line.startsWith('## ')) {
+      return <h2 key={i} style={{ fontSize: '1.8rem', fontWeight: '800', marginTop: '3.5rem', marginBottom: '1.5rem', borderLeft: '6px solid #000', paddingLeft: '1rem' }}>{line.replace('## ', '')}</h2>;
+    }
+    // 3. メリット (PROS)
+    if (line.includes('PROS') || line.includes('▲')) {
+      return <div key={i} style={{ backgroundColor: '#e6fffa', borderLeft: '4px solid #38b2ac', padding: '1rem', margin: '0.5rem 0', borderRadius: '0 8px 8px 0', fontWeight: '600', color: '#2c7a7b' }}>{line}</div>;
+    }
+    // 4. デメリット (CONS)
+    if (line.includes('CONS') || line.includes('▼')) {
+      return <div key={i} style={{ backgroundColor: '#fff5f5', borderLeft: '4px solid #f56565', padding: '1rem', margin: '0.5rem 0', borderRadius: '0 8px 8px 0', fontWeight: '600', color: '#c53030' }}>{line}</div>;
+    }
+    // 5. 通常テキスト
+    return <p key={i} style={{ marginBottom: '1.2rem', color: '#333', fontSize: '1.15rem' }}>{line}</p>;
+  });
 
   return (
-    <article style={{ backgroundColor: '#fff', minHeight: '100vh', color: '#1a1a1a', selectionColor: '#0070f3' }}>
-      <div style={{ maxWidth: '850px', margin: '0 auto', padding: '4rem 2rem' }}>
-        <nav style={{ marginBottom: '4rem' }}>
-          <a href="/" style={{ textDecoration: 'none', color: '#666', fontSize: '0.9rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            &larr; INDEX / BACK TO REVIEWS
-          </a>
-        </nav>
+    <main style={{ backgroundColor: '#fff', minHeight: '100vh', color: '#000' }}>
+      <nav style={{ padding: '1.5rem', borderBottom: '1px solid #eee', position: 'sticky', top: 0, backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)', zIndex: 10 }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <a href="/" style={{ textDecoration: 'none', color: '#000', fontWeight: '900', fontSize: '1.2rem' }}>AI INSIGHT GLOBAL</a>
+          <span style={{ fontSize: '0.8rem', fontWeight: 'bold', backgroundColor: '#000', color: '#fff', padding: '4px 8px', borderRadius: '4px' }}>VERIFIED REPORT</span>
+        </div>
+      </nav>
 
+      <article style={{ padding: '4rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
         <header style={{ marginBottom: '4rem' }}>
-          <div style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '0.3rem 0.8rem', fontSize: '0.75rem', fontWeight: 'bold', marginBottom: '1rem', letterSpacing: '1px' }}>
-            EXCLUSIVE ANALYSIS
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem' }}>
+            {['TECHNOLOGY', 'AI REVIEW', '2026'].map(tag => (
+              <span key={tag} style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#888', border: '1px solid #eee', padding: '2px 8px', borderRadius: '20px' }}>{tag}</span>
+            ))}
           </div>
-          {renderContent(content.split('\n')[0]) /* Titleのみ */}
         </header>
 
-        <section style={{ lineHeight: '1.8', fontFamily: 'Georgia, serif' }}>
-          {renderContent(content.split('\n').slice(1).join('\n'))}
+        <section style={{ lineHeight: '1.8' }}>
+          {renderedContent}
         </section>
 
-        <footer style={{ marginTop: '6rem', padding: '3rem', borderTop: '2px solid #f0f0f0', textAlign: 'center' }}>
-          <div style={{ maxWidth: '500px', margin: '0 auto' }}>
-            <h4 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>AI Insight Global Newsletter</h4>
-            <p style={{ fontSize: '0.9rem', color: '#777', marginBottom: '2rem' }}>Subscribe to get daily tool comparisons directly in your inbox.</p>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <input type="email" placeholder="Your email address" style={{ flex: 1, padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }} />
-              <button style={{ backgroundColor: '#000', color: '#fff', padding: '0.8rem 1.5rem', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>JOIN</button>
-            </div>
+        <footer style={{ marginTop: '6rem', padding: '4rem 2rem', backgroundColor: '#000', color: '#fff', borderRadius: '24px', textAlign: 'center' }}>
+          <h3 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Subscribe to the Intelligence</h3>
+          <p style={{ color: '#aaa', marginBottom: '2rem' }}>Get the next-generation AI analysis delivered to your inbox.</p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+            <input type="email" placeholder="email@example.com" style={{ padding: '12px 20px', borderRadius: '8px', border: 'none', width: '250px' }} />
+            <button style={{ padding: '12px 24px', borderRadius: '8px', border: 'none', backgroundColor: '#0070f3', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}>JOIN</button>
           </div>
         </footer>
-      </div>
-    </article>
+      </article>
+    </main>
   );
 }
