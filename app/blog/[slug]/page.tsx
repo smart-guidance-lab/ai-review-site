@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { notFound } from 'next/navigation';
 
-// 全ての記事パスをビルド時に生成する（SEOと高速化に必須）
+// 全ての記事パスをビルド時に確定させる（SEO・高速化の核）
 export async function generateStaticParams() {
   const postsDir = path.join(process.cwd(), 'content', 'posts');
   if (!fs.existsSync(postsDir)) return [];
@@ -12,11 +12,17 @@ export async function generateStaticParams() {
   }));
 }
 
-export default function PostPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+// 記事詳細ページのメインコンポーネント
+export default async function PostPage({ params }: { params: Promise<{ slug: string }> | { slug: string } }) {
+  // paramsを確実に取得
+  const resolvedParams = await params;
+  const { slug } = resolvedParams;
+  
+  // 正しいデータ保存先（content/posts）を指定
   const filePath = path.join(process.cwd(), 'content', 'posts', `${slug}.md`);
 
   if (!fs.existsSync(filePath)) {
+    console.error(`File not found: ${filePath}`);
     notFound();
   }
 
@@ -25,26 +31,27 @@ export default function PostPage({ params }: { params: { slug: string } }) {
   return (
     <article style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', fontFamily: 'system-ui, sans-serif', lineHeight: '1.8' }}>
       <nav style={{ marginBottom: '2rem' }}>
-        <a href="/" style={{ color: '#0070f3', textDecoration: 'none', fontWeight: 'bold' }}>&larr; Back to Global Insights</a>
+        <a href="/" style={{ color: '#0070f3', textDecoration: 'none', fontWeight: 'bold' }}>&larr; Back to Home</a>
       </nav>
       
-      <div style={{ borderLeft: '8px solid #000', paddingLeft: '1.5rem', marginBottom: '3rem' }}>
-        <p style={{ fontSize: '0.9rem', color: '#888', margin: 0 }}>Exclusive Report | AI Insight Global</p>
-      </div>
+      <header style={{ marginBottom: '3rem', borderLeft: '8px solid #0070f3', paddingLeft: '1.5rem' }}>
+        <p style={{ fontSize: '0.9rem', color: '#666', margin: 0 }}>AI INSIGHT GLOBAL | EXCLUSIVE REPORT</p>
+      </header>
 
-      <div style={{ whiteSpace: 'pre-wrap', fontSize: '1.1rem', color: '#333' }}>
-        {/* Markdownの簡易レンダリング：#をタイトルとして強調 */}
+      <div style={{ whiteSpace: 'pre-wrap', fontSize: '1.15rem', color: '#1a1a1a' }}>
         {content.split('\n').map((line, i) => {
-          if (line.startsWith('# ')) return <h1 key={i} style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '1.5rem' }}>{line.replace('# ', '')}</h1>;
-          if (line.startsWith('## ')) return <h2 key={i} style={{ fontSize: '1.8rem', fontWeight: '700', marginTop: '2.5rem', borderBottom: '2px solid #eee' }}>{line.replace('## ', '')}</h2>;
-          return <p key={i}>{line}</p>;
+          if (line.startsWith('# ')) return <h1 key={i} style={{ fontSize: '2.8rem', fontWeight: '900', marginBottom: '1.5rem', lineHeight: '1.2' }}>{line.replace('# ', '')}</h1>;
+          if (line.startsWith('## ')) return <h2 key={i} style={{ fontSize: '1.8rem', fontWeight: '700', marginTop: '2.5rem', borderBottom: '2px solid #eee', paddingBottom: '0.5rem' }}>{line.replace('## ', '')}</h2>;
+          return <p key={i} style={{ marginBottom: '1.2rem' }}>{line}</p>;
         })}
       </div>
 
-      <footer style={{ marginTop: '5rem', padding: '2rem', backgroundColor: '#f0f7ff', borderRadius: '12px' }}>
-        <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Join the AI Intelligence Network</h3>
-        <p style={{ fontSize: '0.9rem', color: '#555' }}>Get daily updates on the world's most powerful AI transformations.</p>
-        <button style={{ background: '#0070f3', color: '#fff', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>Subscribe for Free</button>
+      <footer style={{ marginTop: '5rem', padding: '2rem', backgroundColor: '#f8f9fa', borderRadius: '12px', textAlign: 'center' }}>
+        <h3 style={{ margin: '0 0 1rem 0' }}>Stay Ahead of the AI Curve</h3>
+        <p style={{ color: '#666', fontSize: '0.95rem' }}>New intelligence reports published daily.</p>
+        <div style={{ marginTop: '2rem', fontSize: '0.8rem', color: '#999' }}>
+          [AD] Unlock Premium AI Strategy Kits &rarr;
+        </div>
       </footer>
     </article>
   );
