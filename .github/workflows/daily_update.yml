@@ -25,17 +25,18 @@ jobs:
       - name: Generate article with AI
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          mkdir -p data # フォルダがなければ作成
-          node generate_article.js
+        run: node generate_article.js
 
       - name: Commit and Push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add -A # 変更があったすべてのファイルを対象にする
-          git commit -m "Auto: Update articles and sitemap [skip ci]" || echo "No changes to commit"
+          git add . # 変更されたすべてのファイル（app/blog内のmd含む）を対象にする
+          git commit -m "Auto: Update blog articles and sitemap [skip ci]" || echo "No changes to commit"
           git push
+
+      - name: Wait for GitHub Sync
+        run: sleep 20 # GitHubの内部同期を待つための重要な20秒
 
       - name: Trigger Vercel Deployment
         run: |
