@@ -12,34 +12,45 @@ export default function Home() {
     const files = fs.readdirSync(blogDir).filter(file => file.endsWith('.md'));
     articles = files.map(file => {
       const slug = file.replace('.md', '');
-      const content = fs.readFileSync(path.join(blogDir, file), 'utf8');
+      const content = fs.readFileSync(path.join(blogDir, file), 'utf8') || '';
       const titleMatch = content.match(/^#\s+(.*)/m);
-      const displayTitle = titleMatch ? titleMatch[1] : slug.split('-').slice(0, -1).join(' ').toUpperCase();
+      const displayTitle = titleMatch ? titleMatch[1] : slug.replace(/-/g, ' ');
       const timestamp = parseInt(file.split('-').pop() || '0');
       return { slug, displayTitle, timestamp };
     }).sort((a, b) => b.timestamp - a.timestamp);
   }
 
   return (
-    <main style={{ backgroundColor: '#fff', minHeight: '100vh', color: '#000' }}>
-      <header style={{ padding: '6rem 1.5rem 4rem', textAlign: 'center', borderBottom: '1px solid #eee' }}>
-        <h1 style={{ fontSize: '4rem', fontWeight: '900', letterSpacing: '-3px', marginBottom: '1rem' }}>AI INSIGHTS</h1>
-        <p style={{ fontSize: '1rem', letterSpacing: '4px', color: '#666', textTransform: 'uppercase' }}>Global Review Intelligence — {articles.length} Volumes</p>
+    <main style={{ padding: '4rem 2rem', maxWidth: '1000px', margin: '0 auto', fontFamily: '"Georgia", serif', backgroundColor: '#fff', color: '#111', lineHeight: '1.6' }}>
+      <header style={{ textAlign: 'left', marginBottom: '6rem', borderBottom: '1px solid #eee', paddingBottom: '3rem' }}>
+        <h1 style={{ fontSize: '4.5rem', fontWeight: 'normal', letterSpacing: '-3px', margin: 0, fontFamily: '"Times New Roman", serif' }}>AI INSIGHT GLOBAL</h1>
+        <p style={{ fontSize: '1.2rem', fontStyle: 'italic', color: '#555', marginTop: '1rem' }}>Independent dispatches from the digital frontier.</p>
       </header>
 
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '4rem 1.5rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '3rem' }}>
-          {articles.map(article => (
-            <Link key={article.slug} href={`/blog/${article.slug}`} style={{ textDecoration: 'none', color: 'inherit', group: 'true' }}>
-              <article style={{ borderLeft: '1px solid #000', paddingLeft: '1.5rem', transition: '0.3s' }}>
-                <p style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#999', marginBottom: '0.5rem' }}>{new Date(article.timestamp).toLocaleDateString()}</p>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: '800', lineHeight: '1.2', marginBottom: '1rem' }}>{article.displayTitle}</h2>
-                <span style={{ fontSize: '0.85rem', fontWeight: 'bold', textDecoration: 'underline' }}>VIEW REPORT &rarr;</span>
+      <section style={{ display: 'grid', gap: '4rem' }}>
+        {articles.length === 0 ? (
+          <p>The wire is silent. Updates expected shortly.</p>
+        ) : (
+          articles.map(article => (
+            <Link key={article.slug} href={`/blog/${article.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <article style={{ cursor: 'pointer', maxWidth: '700px' }}>
+                <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '2px', color: '#888' }}>Intelligence Report</span>
+                <h2 style={{ fontSize: '2.2rem', fontWeight: 'normal', margin: '0.5rem 0 1rem 0', lineHeight: '1.1', borderBottom: '1px solid transparent', transition: 'border-color 0.3s' }}
+                    onMouseOver={(e) => e.currentTarget.style.borderColor = '#000'}
+                    onMouseOut={(e) => e.currentTarget.style.borderColor = 'transparent'}>
+                  {article.displayTitle}
+                </h2>
+                <p style={{ color: '#0070f3', fontSize: '0.9rem', fontWeight: 'bold' }}>READ DISPATCH &rarr;</p>
               </article>
             </Link>
-          ))}
-        </div>
-      </div>
+          ))
+        )}
+      </section>
+
+      <footer style={{ marginTop: '10rem', borderTop: '1px solid #000', paddingTop: '2rem', fontSize: '0.9rem', display: 'flex', justifyContent: 'space-between' }}>
+        <span>&copy; 2026 AI Insight Global</span>
+        <span>The Intelligence of Choice</span>
+      </footer>
     </main>
   );
 }
