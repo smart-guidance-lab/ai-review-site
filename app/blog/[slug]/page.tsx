@@ -15,10 +15,17 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   if (!fs.existsSync(filePath)) notFound();
   let content = fs.readFileSync(filePath, 'utf8');
 
-  // URLタグの抽出と本文からの除去
+  // URL抽出
   const urlMatch = content.match(/\[TARGET_URL:\s*(.*?)\]/);
-  const targetUrl = urlMatch ? urlMatch[1] : 'https://ai-insight-global.vercel.app';
-  content = content.replace(/\[TARGET_URL:\s*.*?\]/, '');
+  let targetUrl = urlMatch ? urlMatch[1].trim() : '';
+  
+  // 【絶対パスの強制】httpが含まれない場合は自分自身のトップページへ戻す（エラー回避）
+  if (!targetUrl.startsWith('http')) {
+    targetUrl = '/';
+  }
+
+  // タグを本文から除去
+  content = content.replace(/\[TARGET_URL:.*?\]/g, '');
 
   return (
     <article style={{ padding: '4rem 2rem', maxWidth: '800px', margin: '0 auto', fontFamily: '"Georgia", serif', color: '#111', lineHeight: '1.8' }}>
