@@ -3,22 +3,27 @@ const path = require('path');
 const https = require('https');
 
 async function generateArticle() {
-    const tools = ['ChatGPT-5', 'Claude 4', 'Midjourney v7', 'Gemini 2.0 Ultra', 'Copilot Pro', 'Sora', 'Perplexity Pro'];
+    const tools = ['OpenAI Sora', 'Claude 3.5 Opus', 'Midjourney v6.1', 'Sunno AI v4', 'Perplexity Pages', 'Kling AI'];
     const tool = tools[Math.floor(Math.random() * tools.length)];
     
-    const prompt = `Write a professional tech analysis for a high-end journal. 
-    Topic: ${tool}. 
-    Style Guidelines:
-    - STRICTLY PROHIBIT Markdown tables (|---|).
-    - STRICTLY PROHIBIT excessive bolding (**).
-    - Use only # and ## for headers.
-    - Structure: Narrative introduction, The Critical Edge (Pros), and The Practical Friction (Cons) as prose paragraphs.
-    - Tone: Sophisticated, British English, expert critique.`;
+    // テーブル、箇条書き、太字を物理的に禁止し、高級誌の「コラム」を書かせる
+    const prompt = `Write a sophisticated tech critique on "${tool}".
+    STRICT RULES:
+    - DO NOT use Markdown tables (e.g., |---|).
+    - DO NOT use bullet points or lists.
+    - DO NOT use bolding (**word**).
+    - Use ONLY # for the main title and ## for subheadings.
+    - Write in the style of a long-form essay for The New Yorker or The Economist.
+    - Structure: A captivating hook, an analytical body exploring paradoxes, and a visionary finale.
+    - Vocabulary: Academic, slightly cynical, yet deeply insightful.`;
 
     const data = JSON.stringify({
         model: "gpt-4o",
-        messages: [{role: "system", content: "You are an elite technology columnist. You never use generic AI formatting or clichés."}, {role: "user", content: prompt}],
-        max_tokens: 1200
+        messages: [
+            {role: "system", content: "You are an elite technology critic. You hate AI cliches. You never use tables or lists. You speak in fluid, rhythmic prose."},
+            {role: "user", content: prompt}
+        ],
+        max_tokens: 1500
     });
 
     const options = {
@@ -38,12 +43,16 @@ async function generateArticle() {
             try {
                 const response = JSON.parse(body);
                 const content = response.choices[0].message.content;
+                // 万が一テーブル記号が混入した場合の「強制抹殺フィルター」
+                const cleanedContent = content.replace(/\|/g, '').replace(/\*\*+/g, '');
+                
                 const timestamp = Date.now();
                 const blogDir = path.join(process.cwd(), 'content/posts');
                 if (!fs.existsSync(blogDir)) fs.mkdirSync(blogDir, { recursive: true });
-                fs.writeFileSync(path.join(blogDir, `ai-article-${timestamp}.md`), content);
+                fs.writeFileSync(path.join(blogDir, `ai-article-${timestamp}.md`), cleanedContent);
+                console.log('Pure editorial content generated.');
                 updateSitemap();
-            } catch (e) { console.error('API Error'); }
+            } catch (e) { console.error('Processing error'); }
         });
     });
     req.on('error', (e) => console.error(e));
