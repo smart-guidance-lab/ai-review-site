@@ -3,33 +3,29 @@ const path = require('path');
 const https = require('https');
 
 async function generateArticle() {
-    // レビュー対象（ここを増やすことでサイトのコンテンツが豊かになる）
     const toolData = [
-        { name: 'ChatGPT', url: 'https://chatgpt.com' },
-        { name: 'Claude', url: 'https://claude.ai' },
-        { name: 'Midjourney', url: 'https://midjourney.com' },
-        { name: 'Perplexity', url: 'https://www.perplexity.ai' },
-        { name: 'Sora', url: 'https://openai.com/sora' },
-        { name: 'Mistral AI', url: 'https://mistral.ai' },
-        { name: 'Jasper', url: 'https://www.jasper.ai' }
+        { name: 'ChatGPT', url: 'https://chatgpt.com', category: 'LLM' },
+        { name: 'Claude', url: 'https://claude.ai', category: 'Writing' },
+        { name: 'Midjourney', url: 'https://midjourney.com', category: 'Design' },
+        { name: 'Perplexity', url: 'https://www.perplexity.ai', category: 'Search' },
+        { name: 'Sora', url: 'https://openai.com/sora', category: 'Video' }
     ];
     const tool = toolData[Math.floor(Math.random() * toolData.length)];
     
-    const prompt = `Write a professional tech analysis. Topic: ${tool.name}. 
+    const prompt = `Write a deep-dive analysis. Topic: ${tool.name}. 
     Structure:
     - # Title
     - > Summary.
     - ## The Silver Lining
     - ## The Hidden Friction
     - ## Editorial Verdict
-    Important: End with exactly this line: [TARGET_URL: ${tool.url}]`;
+    Important: End with these two tags:
+    [TARGET_URL: ${tool.url}]
+    [IMG_KEYWORD: ${tool.category}]`;
 
     const data = JSON.stringify({
         model: "gpt-4o",
-        messages: [
-            {role: "system", content: "Senior tech editor. High-end magazine style. British English."},
-            {role: "user", content: prompt}
-        ],
+        messages: [{role: "system", content: "Senior tech editor. Provide high-end essay."}, {role: "user", content: prompt}],
         max_tokens: 1500
     });
 
@@ -55,7 +51,7 @@ async function generateArticle() {
     });
     req.write(data); req.end();
 }
-
+// (updateSitemapは変更なし)
 function updateSitemap() {
     const baseUrl = 'https://ai-review-site-nine.vercel.app';
     const blogDir = 'content/posts';
