@@ -6,19 +6,18 @@ async function generateArticle() {
     const tools = ['ChatGPT-5', 'Claude 4', 'Midjourney v7', 'Gemini 2.0 Ultra', 'Copilot Pro', 'Sora', 'Perplexity Pro'];
     const tool = tools[Math.floor(Math.random() * tools.length)];
     
-    // AI臭い「太字」や「表」を禁止し、エッセイ形式で書かせるプロンプト
-    const prompt = `Write a deep-dive, professional tech analysis for a high-end magazine. 
+    const prompt = `Write a professional tech analysis for a high-end journal. 
     Topic: ${tool}. 
     Style Guidelines:
-    - NO Markdown tables. NO excessive bolding.
-    - Use clear, sophisticated headings (# and ## only).
-    - Focus on nuanced perspectives: "The Silver Lining" (Pros) and "The Hidden Friction" (Cons) woven into paragraphs.
-    - Write like a human expert: slightly critical, insightful, and forward-looking.
-    - Language: British English for a sophisticated tone.`;
+    - STRICTLY PROHIBIT Markdown tables (|---|).
+    - STRICTLY PROHIBIT excessive bolding (**).
+    - Use only # and ## for headers.
+    - Structure: Narrative introduction, The Critical Edge (Pros), and The Practical Friction (Cons) as prose paragraphs.
+    - Tone: Sophisticated, British English, expert critique.`;
 
     const data = JSON.stringify({
         model: "gpt-4o",
-        messages: [{role: "system", content: "You are a senior tech editor at a prestigious global journal. You avoid AI cliches like 'In conclusion' or 'Unlock your potential'."}, {role: "user", content: prompt}],
+        messages: [{role: "system", content: "You are an elite technology columnist. You never use generic AI formatting or clichés."}, {role: "user", content: prompt}],
         max_tokens: 1200
     });
 
@@ -43,7 +42,6 @@ async function generateArticle() {
                 const blogDir = path.join(process.cwd(), 'content/posts');
                 if (!fs.existsSync(blogDir)) fs.mkdirSync(blogDir, { recursive: true });
                 fs.writeFileSync(path.join(blogDir, `ai-article-${timestamp}.md`), content);
-                console.log('Content generated with editorial standards.');
                 updateSitemap();
             } catch (e) { console.error('API Error'); }
         });
