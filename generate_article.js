@@ -3,25 +3,21 @@ const path = require('path');
 const https = require('https');
 
 async function generateArticle() {
-    const tools = ['ChatGPT-5', 'Claude 4', 'Midjourney v7', 'Gemini 2.0 Ultra', 'Copilot Pro', 'Sora', 'Perplexity Pro'];
+    // ツールリストの精査
+    const tools = ['ChatGPT', 'Claude', 'Midjourney', 'Gemini', 'Copilot', 'Sora', 'Perplexity'];
     const tool = tools[Math.floor(Math.random() * tools.length)];
     
-    const prompt = `Write a deep-dive, professional tech analysis for a high-end magazine. 
-    Topic: ${tool}. 
-    Style Guidelines:
-    - NO Markdown tables. NO excessive bolding.
-    - Use clear, sophisticated headings (# and ## only).
-    - Focus on nuanced perspectives: "The Silver Lining" and "The Hidden Friction" woven into paragraphs.
-    - Write like a human expert: slightly critical, insightful, and forward-looking.
-    - Language: British English for a sophisticated tone.`;
+    const prompt = `Write a deep-dive analysis for a high-end magazine. Topic: ${tool}. 
+    Style: Sophisticated British English, NO Markdown tables, NO bolding, NO AI cliches. 
+    Focus on "The Silver Lining" and "The Hidden Friction". Use # for Title and ## for Subheadings.`;
 
     const data = JSON.stringify({
-        model: "gpt-4o",
+        model: "gpt-4o", // モデル名を最新の安定版に固定
         messages: [
-            {role: "system", content: "You are a senior tech editor at a prestigious global journal. You avoid AI cliches like 'In conclusion' or 'Unlock your potential'."},
+            {role: "system", content: "You are a senior tech editor at a prestigious journal. Write in an editorial, human-like essay style."},
             {role: "user", content: prompt}
         ],
-        max_tokens: 1200
+        max_tokens: 1500
     });
 
     const options = {
@@ -38,33 +34,41 @@ async function generateArticle() {
         let body = '';
         res.on('data', (d) => body += d);
         res.on('end', () => {
+            console.log('HTTP Status:', res.statusCode);
             try {
                 const response = JSON.parse(body);
-                if (!response.choices || response.choices.length === 0) {
-                    throw new Error('Invalid API Response');
+                
+                // 失敗時の生ログ出力（ここが重要）
+                if (response.error) {
+                    console.error('API Error Details:', JSON.stringify(response.error, null, 2));
+                    throw new Error(`OpenAI Error: ${response.error.message}`);
                 }
+
+                if (!response.choices || response.choices.length === 0) {
+                    console.error('Raw Response:', body);
+                    throw new Error('No choices in response');
+                }
+
                 const content = response.choices[0].message.content;
                 const timestamp = Date.now();
                 
-                // 【自己修復プロトコル】フォルダの存在チェックと強制作成
                 const blogDir = path.join(process.cwd(), 'content/posts');
                 if (!fs.existsSync(blogDir)) {
-                    console.log('Target directory missing. Executing reconstruction...');
                     fs.mkdirSync(blogDir, { recursive: true });
                 }
                 
                 fs.writeFileSync(path.join(blogDir, `ai-article-${timestamp}.md`), content);
-                console.log('Dispatch successfully recorded in the archives.');
+                console.log('Article successfully written to archives.');
                 updateSitemap();
             } catch (e) { 
-                console.error('Critical Failure:', e.message);
-                process.exit(1); // 失敗をActionsに通知
+                console.error('Processing Failed:', e.message);
+                process.exit(1);
             }
         });
     });
 
     req.on('error', (e) => {
-        console.error('Connection Error:', e);
+        console.error('Connection Failed:', e.message);
         process.exit(1);
     });
     req.write(data);
@@ -74,8 +78,6 @@ async function generateArticle() {
 function updateSitemap() {
     const baseUrl = 'https://ai-review-site-nine.vercel.app';
     const blogDir = 'content/posts';
-    
-    // フォルダがない場合は処理を中断（作成はgenerateArticle側で行うため安全）
     if (!fs.existsSync(blogDir)) return;
     
     const files = fs.readdirSync(blogDir).filter(f => f.endsWith('.md'));
