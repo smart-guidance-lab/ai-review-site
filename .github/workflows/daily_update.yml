@@ -3,7 +3,7 @@ name: Generate Daily AI Review
 on:
   schedule:
     - cron: '0 0 * * *'
-  workflow_dispatch:
+  workflow_dispatch: # 手動実行を可能にする
 
 jobs:
   build:
@@ -31,12 +31,13 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add . # 変更されたすべてのファイル（app/blog内のmd含む）を対象にする
-          git commit -m "Auto: Update blog articles and sitemap [skip ci]" || echo "No changes to commit"
+          git add .
+          # --allow-empty により、変更検知の失敗を防ぎ、確実にプロセスを完了させる
+          git commit --allow-empty -m "Auto: Rebuilding archives and sitemap [skip ci]"
           git push
-
+        
       - name: Wait for GitHub Sync
-        run: sleep 20 # GitHubの内部同期を待つための重要な20秒
+        run: sleep 20
 
       - name: Trigger Vercel Deployment
         run: |
