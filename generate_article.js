@@ -3,29 +3,31 @@ const path = require('path');
 const https = require('https');
 
 async function generateArticle() {
+    // レビュー対象（ここを増やすことでサイトのコンテンツが豊かになる）
     const toolData = [
         { name: 'ChatGPT', url: 'https://chatgpt.com' },
         { name: 'Claude', url: 'https://claude.ai' },
         { name: 'Midjourney', url: 'https://midjourney.com' },
-        { name: 'Perplexity', url: 'https://perplexity.ai' },
-        { name: 'Sora', url: 'https://openai.com/sora' }
+        { name: 'Perplexity', url: 'https://www.perplexity.ai' },
+        { name: 'Sora', url: 'https://openai.com/sora' },
+        { name: 'Mistral AI', url: 'https://mistral.ai' },
+        { name: 'Jasper', url: 'https://www.jasper.ai' }
     ];
     const tool = toolData[Math.floor(Math.random() * toolData.length)];
     
-    const prompt = `Write a deep-dive analysis for a high-end magazine. Topic: ${tool.name}. 
+    const prompt = `Write a professional tech analysis. Topic: ${tool.name}. 
     Structure:
     - # Title
-    - > A 2-sentence sophisticated summary.
+    - > Summary.
     - ## The Silver Lining
     - ## The Hidden Friction
     - ## Editorial Verdict
-    Style: Sophisticated British English, NO bolding (**). 
-    Important: At the very end, add a single line exactly like this: [TARGET_URL: ${tool.url}]`;
+    Important: End with exactly this line: [TARGET_URL: ${tool.url}]`;
 
     const data = JSON.stringify({
         model: "gpt-4o",
         messages: [
-            {role: "system", content: "Senior tech editor. Provide insights. Ensure the [TARGET_URL: ...] tag is at the bottom."},
+            {role: "system", content: "Senior tech editor. High-end magazine style. British English."},
             {role: "user", content: prompt}
         ],
         max_tokens: 1500
@@ -53,7 +55,7 @@ async function generateArticle() {
     });
     req.write(data); req.end();
 }
-// (updateSitemap関数の内容は変更なしのため省略して実装してください)
+
 function updateSitemap() {
     const baseUrl = 'https://ai-review-site-nine.vercel.app';
     const blogDir = 'content/posts';
