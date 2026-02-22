@@ -21,36 +21,70 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   
   const imgMatch = content.match(/\[IMG_KEYWORD:\s*(.*?)\]/);
   const imgKeyword = imgMatch ? imgMatch[1].trim() : 'technology';
-  const imageUrl = `https://source.unsplash.com/featured/1200x600?${imgKeyword},abstract`;
+  
+  // より安定した画像生成URL（Unsplash Sourceの代替プロトコル）
+  const imageUrl = `https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200&h=600&sig=${imgKeyword}`;
 
   // タグを本文から除去
   content = content.replace(/\[TARGET_URL:.*?\]/g, '').replace(/\[IMG_KEYWORD:.*?\]/g, '');
 
   return (
-    <article style={{ padding: '0 0 6rem 0', maxWidth: '900px', margin: '0 auto', fontFamily: '"Georgia", serif', color: '#111', lineHeight: '1.8', backgroundColor: '#fff' }}>
-      {/* アイキャッチ画像セクション */}
-      <div style={{ width: '100%', height: '450px', backgroundColor: '#f0f0f0', marginBottom: '4rem', overflow: 'hidden' }}>
-        <img src={imageUrl} alt={imgKeyword} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(20%) brightness(90%)' }} />
+    <article style={{ padding: '0 0 8rem 0', maxWidth: '100%', margin: '0 auto', fontFamily: '"Georgia", serif', color: '#111', lineHeight: '1.8', backgroundColor: '#fff' }}>
+      
+      {/* 究極のカバー画像セクション */}
+      <div style={{ 
+        width: '100%', 
+        height: '60vh', 
+        backgroundColor: '#111', 
+        position: 'relative', 
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <img 
+          src={imageUrl} 
+          alt={imgKeyword} 
+          style={{ 
+            width: '100%', 
+            height: '100%', 
+            objectFit: 'cover', 
+            filter: 'brightness(0.7) contrast(1.1)',
+            transition: 'transform 0.5s ease-in-out'
+          }} 
+        />
+        <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', height: '50%', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }}></div>
       </div>
 
-      <div style={{ padding: '0 2rem' }}>
+      <div style={{ maxWidth: '800px', margin: '-100px auto 0', position: 'relative', backgroundColor: '#fff', padding: '4rem 3rem', boxShadow: '0 30px 60px rgba(0,0,0,0.1)', borderRadius: '4px' }}>
         <nav style={{ marginBottom: '3rem' }}>
-          <a href="/" style={{ textDecoration: 'none', color: '#0070f3', fontSize: '0.9rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>&larr; Back to Index</a>
+          <a href="/" style={{ textDecoration: 'none', color: '#0070f3', fontSize: '0.85rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px' }}>&larr; Index</a>
         </nav>
 
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {content.split('\n').map((line, i) => {
-            if (line.startsWith('# ')) return <h1 key={i} style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontFamily: '"Times New Roman", serif', lineHeight: '1', marginBottom: '2rem', letterSpacing: '-2px' }}>{line.replace('# ', '')}</h1>;
-            if (line.startsWith('> ')) return <blockquote key={i} style={{ fontSize: '1.4rem', fontStyle: 'italic', color: '#444', borderLeft: '4px solid #000', paddingLeft: '2rem', margin: '3rem 0', lineHeight: '1.4' }}>{line.replace('> ', '')}</blockquote>;
-            if (line.startsWith('## ')) return <h2 key={i} style={{ fontSize: '2.2rem', borderTop: '2px solid #000', paddingTop: '1.5rem', marginTop: '4rem', fontFamily: '"Times New Roman", serif' }}>{line.replace('## ', '')}</h2>;
-            return <p key={i} style={{ marginBottom: '1.8rem', fontSize: '1.2rem' }}>{line}</p>;
+            // タイトル
+            if (line.startsWith('# ')) return <h1 key={i} style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontFamily: '"Times New Roman", serif', lineHeight: '1.1', marginBottom: '2.5rem', letterSpacing: '-1.5px', fontWeight: 'normal', color: '#000' }}>{line.replace('# ', '')}</h1>;
+            
+            // 概要（引用）
+            if (line.startsWith('> ')) return <div key={i} style={{ fontSize: '1.3rem', fontStyle: 'italic', color: '#555', borderLeft: '2px solid #0070f3', padding: '0.5rem 0 0.5rem 2rem', margin: '3rem 0', lineHeight: '1.6' }}>{line.replace('> ', '')}</div>;
+            
+            // 中見出し
+            if (line.startsWith('## ')) return <h2 key={i} style={{ fontSize: '2.2rem', borderBottom: '1px solid #000', paddingBottom: '0.5rem', marginTop: '5rem', marginBottom: '2rem', fontFamily: '"Times New Roman", serif', fontWeight: 'normal' }}>{line.replace('## ', '')}</h2>;
+            
+            if (line.trim() === '') return <div key={i} style={{ height: '1.2rem' }} />;
+            
+            // 本文
+            return <p key={i} style={{ marginBottom: '1.8rem', fontSize: '1.2rem', textAlign: 'justify', hyphens: 'auto' }}>{line}</p>;
           })}
         </div>
 
-        <footer style={{ marginTop: '10rem', padding: '4rem', border: '1px solid #eee', textAlign: 'center', backgroundColor: '#fafafa' }}>
-          <h3 style={{ fontFamily: '"Times New Roman", serif', fontSize: '1.8rem', marginBottom: '1rem' }}>The Intelligence Verdict</h3>
-          <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '2.5rem', maxWidth: '500px', margin: '0 auto 2.5rem' }}>Our final analysis suggests direct engagement with this protocol. Explore the official environment below.</p>
-          <a href={targetUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '1.2rem 3rem', textDecoration: 'none', fontSize: '1rem', fontWeight: 'bold', letterSpacing: '3px', transition: 'transform 0.2s' }}>EXPLORE OFFICIAL TOOL</a>
+        {/* コンバージョン・エリア */}
+        <footer style={{ marginTop: '10rem', padding: '5rem 2rem', border: '1px solid #eee', textAlign: 'center', backgroundColor: '#fafafa' }}>
+          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '3px', color: '#999', display: 'block', marginBottom: '1rem' }}>Verdict</span>
+          <h3 style={{ fontFamily: '"Times New Roman", serif', fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 'normal' }}>Access the Protocol</h3>
+          <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '3rem', maxWidth: '450px', margin: '0 auto 3rem' }}>Deploy this intelligence into your workflow via the official gateway.</p>
+          <a href={targetUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '1.2rem 4rem', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: '4px' }}>GO TO OFFICIAL</a>
         </footer>
       </div>
     </article>
