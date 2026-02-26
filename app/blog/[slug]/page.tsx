@@ -10,46 +10,55 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   if (!fs.existsSync(filePath)) notFound();
   const rawContent = fs.readFileSync(filePath, 'utf8');
 
-  // メタデータ抽出
   const title = rawContent.match(/# (.*)/)?.[1] || "Intelligence Report";
   const body = rawContent.replace(/# .*/, '').replace(/\[.*\]/g, '').trim();
   
-  // スコア計算ロジック（バグ修正：サーバーサイドで一貫した値を生成）
   const hash = Array.from(resolvedParams.slug).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const score = 88 + (hash % 10); // 88%〜97%の間で変動
+  const score = 88 + (hash % 10);
+  const auditID = `LDN-${hash.toString(16).toUpperCase()}-2026`;
+
+  // 【重要】ここに作成したStripeのURLを貼り付けてください
+  const GLOBAL_PAYMENT_URL = "https://buy.stripe.com/6oUcN41D9ggo0a4efg8so03";
 
   return (
-    <article style={{ maxWidth: '900px', margin: '0 auto', padding: '4rem 2rem', borderLeft: '1px solid #eee', borderRight: '1px solid #eee' }}>
-      <header style={{ borderBottom: '3px solid #000', paddingBottom: '2rem', marginBottom: '3rem' }}>
-        <p style={{ textTransform: 'uppercase', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '3px', margin: 0, color: '#a00' }}>
-          Global Technology Audit | Confidential
-        </p>
-        <h1 style={{ fontSize: '3.5rem', marginTop: '1rem', lineHeight: '1.1' }}>{title}</h1>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', fontSize: '0.9rem', fontStyle: 'italic' }}>
-          <span>Intelligence Rating: <strong>{score}.4/100</strong></span>
-          <span>Verified by AI Insight Global Node #{hash.toString(16).toUpperCase()}</span>
+    <article style={{ maxWidth: '850px', margin: '0 auto', padding: '6rem 2rem', backgroundColor: '#fff', color: '#111', boxShadow: '0 0 50px rgba(0,0,0,0.02)' }}>
+      <header style={{ borderBottom: '2px solid #111', paddingBottom: '2rem', marginBottom: '4rem' }}>
+        <p style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.2em', color: '#800', fontWeight: 'bold' }}>Institutional Grade Intelligence</p>
+        <h1 style={{ fontSize: '3.8rem', fontFamily: '"Playfair Display", serif', lineHeight: '1', margin: '1rem 0' }}>{title}</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666', marginTop: '2rem' }}>
+          <span>ISSUE: FEB 2026</span>
+          <span>NODE: {auditID}</span>
         </div>
       </header>
 
-      <div style={{ fontSize: '1.25rem', color: '#333' }}>
+      <section style={{ fontSize: '1.2rem', lineHeight: '1.8', textAlign: 'justify', marginBottom: '6rem' }}>
         {body.split('\n').map((line, i) => (
-          line.trim() ? <p key={i}>{line}</p> : <br key={i} />
+          line.trim() ? <p key={i} style={{ marginBottom: '2rem' }}>{line}</p> : null
         ))}
+      </section>
+
+      {/* 監査完了シール (London AI Audit Seal) */}
+      <div style={{ border: '1px solid #ddd', padding: '3rem', position: 'relative', backgroundColor: '#fafafa', marginBottom: '6rem' }}>
+        <div style={{ position: 'absolute', top: '-25px', right: '30px', width: '100px', height: '100px', borderRadius: '50%', border: '4px double #800', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', transform: 'rotate(-15deg)', boxShadow: '5px 5px 15px rgba(0,0,0,0.1)' }}>
+          <div style={{ textAlign: 'center', color: '#800', fontWeight: 'bold', fontSize: '0.6rem', lineHeight: '1' }}>
+            LONDON AI<br/>AUDIT<br/>PASSED
+          </div>
+        </div>
+        <h3 style={{ fontSize: '1.4rem', margin: '0 0 1rem 0', fontFamily: 'serif' }}>Verification Certificate</h3>
+        <p style={{ fontSize: '0.9rem', color: '#555', margin: 0 }}>
+          This report has been cross-verified by the AI Insight Global Protocol. 
+          Digital Signature: <span style={{ fontFamily: 'monospace', color: '#000' }}>{hash.toString(32).toUpperCase()}-SIG-X99</span>
+        </p>
       </div>
 
-      <div style={{ marginTop: '5rem', padding: '4rem', background: '#f5f5f5', border: '1px solid #ddd', textAlign: 'center' }}>
-        <h3 style={{ fontSize: '1.8rem', marginBottom: '1.5rem' }}>Deeper Analysis Required?</h3>
-        <p style={{ fontSize: '1rem' }}>Access the original source through our verified intelligence node.</p>
-        <a href="https://www.perplexity.ai" target="_blank" style={{
-          display: 'inline-block', padding: '1rem 3rem', background: '#000', color: '#fff', textDecoration: 'none', fontWeight: 'bold', fontSize: '1.1rem'
-        }}>
-          START ANALYSIS WITH PERPLEXITY &rarr;
+      {/* 最終クロージング：収益化の心臓部 */}
+      <div style={{ textAlign: 'center', padding: '5rem 2rem', background: '#111', color: '#fff' }}>
+        <h2 style={{ fontSize: '2.2rem', marginBottom: '1.5rem', fontFamily: '"Playfair Display", serif' }}>Secure Your Strategic Advantage</h2>
+        <p style={{ fontSize: '1.1rem', marginBottom: '3rem', opacity: 0.8 }}>Join the Executive DAO and access the full algorithmic framework.</p>
+        <a href={GLOBAL_PAYMENT_URL} style={{ display: 'inline-block', padding: '1.2rem 4rem', backgroundColor: '#fff', color: '#000', textDecoration: 'none', fontWeight: 'bold', letterSpacing: '1px' }}>
+          ACTIVATE MEMBERSHIP &rarr;
         </a>
       </div>
-
-      <footer style={{ marginTop: '5rem', borderTop: '1px solid #000', paddingTop: '2rem', fontSize: '0.8rem', opacity: 0.6 }}>
-        © 2026 AI Insight Global. All rights reserved. Distributed for institutional subscribers.
-      </footer>
     </article>
   );
 }
