@@ -1,20 +1,24 @@
 const fs = require('fs');
 const path = require('path');
 
-async function createNewsletter() {
+async function generatePersonalizedNewsletters() {
     const postsDir = path.join(process.cwd(), 'content/posts');
-    const files = fs.readdirSync(postsDir).sort().slice(0, 5); // 最新5件
-    
-    let digest = "<h1>AI INSIGHT GLOBAL WEEKLY DIGEST</h1>";
-    files.forEach(file => {
+    const allPosts = fs.readdirSync(postsDir).map(file => {
         const content = fs.readFileSync(path.join(postsDir, file), 'utf8');
-        const title = content.match(/# (.*)/)?.[1];
-        digest += `<p><strong>${title}</strong><br><a href="https://your-domain.com/blog/${file.replace('.md', '')}">Read Full Audit</a></p>`;
+        const category = content.match(/\[IMG_KEYWORD:\s*(.*?)\]/)?.[1] || 'General';
+        return { file, category, title: content.match(/# (.*)/)?.[1] };
     });
 
-    digest += "<hr><p>Special Offer: <a href='YOUR_HIGH_TICKET_LINK'>Join our Executive AI Masterclass</a></p>";
+    const segments = ['LLM', 'Design', 'Video', 'Search'];
     
-    fs.writeFileSync('newsletter_draft.html', digest);
-    console.log("Newsletter draft generated.");
+    segments.forEach(seg => {
+        const matchedPosts = allPosts.filter(p => p.category === seg).slice(0, 3);
+        let draft = `<h1>EXCLUSIVE INSIGHT: ${seg} FOCUS</h1>`;
+        matchedPosts.forEach(p => {
+            draft += `<p><strong>${p.title}</strong><br><a href="https://your-domain.com/blog/${p.file.replace('.md', '')}">Analyze Data</a></p>`;
+        });
+        fs.writeFileSync(`newsletter_${seg.toLowerCase()}.html`, draft);
+    });
+    console.log("Segmented Newsletters Ready.");
 }
-createNewsletter();
+generatePersonalizedNewsletters();
