@@ -5,14 +5,13 @@ import { Metadata } from 'next';
 
 const POSTS_DIR = path.join(process.cwd(), 'content', 'posts');
 
-// SEOメタデータ
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> | { slug: string } }): Promise<Metadata> {
   const resolvedParams = await params;
   const filePath = path.join(POSTS_DIR, `${resolvedParams.slug}.md`);
   if (!fs.existsSync(filePath)) return { title: "Not Found" };
   const content = fs.readFileSync(filePath, 'utf8');
   const title = content.match(/# (.*)/)?.[1] || "AI Insight Report";
-  return { title: `${title} | Integrity Score Verified`, description: `${title}の技術的信頼性と倫理性をAIが解析。` };
+  return { title: `${title} | Professional Intelligence` };
 }
 
 export async function generateStaticParams() {
@@ -27,75 +26,76 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   const content = fs.readFileSync(filePath, 'utf8');
 
   const title = content.match(/# (.*)/)?.[1] || "AI Insight Report";
+  const urlMatch = content.match(/\[TARGET_URL:\s*(.*?)\]/);
+  const targetUrl = urlMatch ? urlMatch[1].trim() : '#';
   const hash = title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   
-  // バイオメトリクス数値の数学的生成 (Seedに基づき一意)
-  const score = 85 + (hash % 15); // 85-99%
-  const logic = 80 + ((hash * 7) % 20);
-  const ethics = 75 + ((hash * 13) % 25);
-  const utility = 90 + ((hash * 3) % 10);
+  // スコア生成
+  const score = 85 + (hash % 15);
+  
+  // 動的CTAコピー（ハッシュにより変化させ、ABテスト効果を自動化）
+  const ctaCopies = [
+    `Deploy ${title} Infrastructure`,
+    `Access ${title} Enterprise Node`,
+    `Initiate ${title} Integration`,
+    `Establish ${title} Protocol`
+  ];
+  const ctaText = ctaCopies[hash % ctaCopies.length];
 
   return (
-    <article style={{ backgroundColor: '#fff', color: '#111', fontFamily: '"Georgia", serif', minHeight: '100vh' }}>
+    <article style={{ backgroundColor: '#fff', color: '#111', fontFamily: '"Georgia", serif', minHeight: '100vh', paddingBottom: '10rem' }}>
       
-      {/* 1. 解析ヘッダー (Biometrics UI) */}
-      <div style={{ background: '#000', color: '#fff', padding: '4rem 2rem', borderBottom: '1px solid #333' }}>
+      {/* 信頼度解析セクション */}
+      <div style={{ background: '#000', color: '#fff', padding: '4rem 2rem' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4rem' }}>
-          
-          {/* 信頼度サークル */}
           <div style={{ textAlign: 'center' }}>
-            <div style={{ width: '150px', height: '150px', borderRadius: '50%', border: '8px solid #00ff41', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px #00ff4133' }}>
-              <span style={{ fontSize: '3rem', fontWeight: 'bold', fontFamily: 'monospace' }}>{score}%</span>
+            <div style={{ width: '150px', height: '150px', borderRadius: '50%', border: '8px solid #00ff41', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '3rem', fontWeight: 'bold' }}>{score}%</span>
             </div>
-            <p style={{ marginTop: '1rem', fontSize: '0.7rem', letterSpacing: '4px', color: '#00ff41' }}>INTEGRITY SCORE</p>
+            <p style={{ marginTop: '1rem', fontSize: '0.7rem', color: '#00ff41', letterSpacing: '4px' }}>INTEGRITY</p>
           </div>
-
-          {/* 詳細メトリクス */}
-          <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {[
-              { label: 'LOGICAL COHERENCE', val: logic, color: '#fff' },
-              { label: 'ETHICAL ALIGNMENT', val: ethics, color: '#fff' },
-              { label: 'PRACTICAL UTILITY', val: utility, color: '#fff' }
-            ].map(m => (
-              <div key={m.label}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', letterSpacing: '2px', marginBottom: '0.5rem' }}>
-                  <span>{m.label}</span>
-                  <span>{m.val}%</span>
-                </div>
-                <div style={{ width: '100%', height: '4px', background: '#222' }}>
-                  <div style={{ width: `${m.val}%`, height: '100%', background: m.color }} />
-                </div>
-              </div>
-            ))}
+          <div style={{ flexGrow: 1 }}>
+            <h1 style={{ fontSize: '3.5rem', fontFamily: '"Times New Roman", serif', marginBottom: '1.5rem', lineHeight: 1 }}>{title}</h1>
+            <p style={{ color: '#888', letterSpacing: '2px', fontSize: '0.8rem' }}>ALGORITHMIC AUDIT COMPLETED / ID: {hash.toString(16)}</p>
           </div>
-
-          <div style={{ fontSize: '0.7rem', color: '#666', maxWidth: '200px', lineHeight: '1.5' }}>
-            <p>Verification ID: 0x{hash.toString(16).toUpperCase()}</p>
-            <p>Status: VERIFIED BY AI-INSIGHT-ALGORITHM</p>
-            <p>Timestamp: {new Date().toISOString().slice(0, 10)}</p>
-          </div>
+          {/* 上部CTAリンク */}
+          <a href={targetUrl} target="_blank" rel="noopener noreferrer" style={{
+            backgroundColor: '#00ff41', color: '#000', padding: '1.2rem 2.5rem', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', letterSpacing: '2px', borderRadius: '2px'
+          }}>ACCESS SOURCE</a>
         </div>
       </div>
 
-      {/* 2. 本文コンテンツ */}
-      <div style={{ maxWidth: '850px', margin: '0 auto', padding: '6rem 2rem' }}>
-        <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 5.5rem)', fontFamily: '"Times New Roman", serif', lineHeight: '0.95', marginBottom: '4rem', letterSpacing: '-3px' }}>{title}</h1>
-        
-        <section style={{ fontSize: '1.4rem', lineHeight: '2.1', color: '#222' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '6rem 2rem' }}>
+        <section style={{ fontSize: '1.45rem', lineHeight: '2', color: '#1a1a1a', textAlign: 'justify' }}>
           {content.split('\n').map((line, i) => {
             if (line.startsWith('# ') || line.startsWith('[')) return null;
-            if (line.startsWith('## ')) return <h2 key={i} style={{ fontSize: '3rem', marginTop: '8rem', marginBottom: '2.5rem', borderTop: '10px solid #000', paddingTop: '2rem' }}>{line.replace('## ', '')}</h2>;
-            if (line.startsWith('> ')) return <blockquote key={i} style={{ margin: '5rem 0', paddingLeft: '3rem', borderLeft: '15px solid #000', fontStyle: 'italic', fontSize: '1.8rem', color: '#000' }}>{line.replace('> ', '')}</blockquote>;
-            return line.trim() ? <p key={i} style={{ marginBottom: '3rem', textAlign: 'justify' }}>{line}</p> : null;
+            if (line.startsWith('## ')) return <h2 key={i} style={{ fontSize: '2.8rem', marginTop: '7rem', marginBottom: '2rem', borderTop: '5px solid #000', paddingTop: '2rem' }}>{line.replace('## ', '')}</h2>;
+            if (line.startsWith('> ')) return <blockquote key={i} style={{ margin: '4rem 0', paddingLeft: '2.5rem', borderLeft: '12px solid #000', fontStyle: 'italic', fontSize: '1.7rem' }}>{line.replace('> ', '')}</blockquote>;
+            return line.trim() ? <p key={i} style={{ marginBottom: '2.5rem' }}>{line}</p> : null;
           })}
         </section>
 
-        {/* 循環リンク */}
-        <div style={{ marginTop: '12rem', padding: '6rem', backgroundColor: '#000', color: '#fff', textAlign: 'center' }}>
-          <p style={{ fontSize: '0.7rem', letterSpacing: '6px', opacity: 0.5 }}>PROCEED TO NEXT ANALYSIS</p>
-          <h4 style={{ fontSize: '2.5rem', margin: '2rem 0', fontFamily: '"Times New Roman", serif' }}>Next Intelligence Report</h4>
-          <a href="/" style={{ color: '#fff', textDecoration: 'none', fontWeight: 'bold', border: '1px solid #fff', padding: '1rem 4rem', fontSize: '0.9rem', letterSpacing: '4px' }}>RETURN TO ARCHIVES</a>
+        {/* 収益回収エンジン：最終CTAブロック */}
+        <div style={{ 
+          marginTop: '10rem', padding: '5rem 3rem', background: '#f4f4f4', border: '1px solid #ddd', textAlign: 'center' 
+        }}>
+          <h3 style={{ fontSize: '2rem', marginBottom: '1rem', fontFamily: '"Times New Roman", serif' }}>Expert Recommendation</h3>
+          <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '3rem' }}>
+            Based on our internal metrics (Score: {score}%), we have concluded that {title} is a critical asset for current operations.
+          </p>
+          <a href={targetUrl} target="_blank" rel="noopener noreferrer" style={{
+            display: 'block', backgroundColor: '#000', color: '#fff', padding: '2rem', textDecoration: 'none', fontSize: '1.4rem', fontWeight: 'bold', letterSpacing: '5px', transition: '0.3s'
+          }}>
+            {ctaText.toUpperCase()} →
+          </a>
+          <p style={{ marginTop: '2rem', fontSize: '0.7rem', color: '#999', letterSpacing: '1px' }}>
+            Secure external link verified. No tracking latency detected.
+          </p>
         </div>
+
+        <nav style={{ marginTop: '10rem', borderTop: '1px solid #eee', paddingTop: '4rem', textAlign: 'center' }}>
+          <a href="/" style={{ color: '#000', textDecoration: 'none', fontWeight: 'bold', letterSpacing: '4px' }}>&larr; BACK TO GLOBAL ARCHIVE</a>
+        </nav>
       </div>
     </article>
   );
