@@ -4,15 +4,18 @@ import path from 'path';
 
 export async function POST(request: Request) {
     try {
-        const { email, topInterests } = await request.json(); // フロントから興味タグを受け取る
+        const { email, topInterests, lang } = await request.json();
         const filePath = path.join(process.cwd(), 'emails.txt');
         
-        // 形式: タイムスタンプ, メール, 興味タグ
-        const record = `${new Date().toISOString()}, ${email}, [${topInterests.join('|')}]\n`;
+        // シーケンス開始状態を含めて保存 (email, lang, interest, currentStep, startDate)
+        const record = `${email}, ${lang}, ${topInterests[0]}, STEP_1, ${new Date().toISOString()}\n`;
         fs.appendFileSync(filePath, record);
         
-        return NextResponse.json({ message: 'Segmented Lead Captured' }, { status: 200 });
+        // 本来はここでDay 1のメール送信APIを叩く
+        console.log(`Sequence started for ${email} in ${lang}`);
+        
+        return NextResponse.json({ message: 'Indoctrination Started' }, { status: 200 });
     } catch (error) {
-        return NextResponse.json({ message: 'Process Error' }, { status: 500 });
+        return NextResponse.json({ message: 'System Error' }, { status: 500 });
     }
 }
