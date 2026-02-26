@@ -3,30 +3,48 @@ const path = require('path');
 const https = require('https');
 
 async function generateArticle() {
+    // トピックの拡充：面制圧のための30項目
     const toolData = [
-        { name: 'ChatGPT', url: 'https://chatgpt.com', category: 'LLM' },
-        { name: 'Claude', url: 'https://claude.ai', category: 'Writing' },
-        { name: 'Midjourney', url: 'https://midjourney.com', category: 'Design' },
-        { name: 'Perplexity', url: 'https://www.perplexity.ai', category: 'Search' },
-        { name: 'Sora', url: 'https://openai.com/sora', category: 'Video' }
+        { name: 'ChatGPT-5', url: 'https://chatgpt.com', category: 'LLM' },
+        { name: 'Claude 3.5 Sonnet', url: 'https://claude.ai', category: 'Writing' },
+        { name: 'Midjourney v7', url: 'https://midjourney.com', category: 'Design' },
+        { name: 'Perplexity Pages', url: 'https://www.perplexity.ai', category: 'Search' },
+        { name: 'Sora', url: 'https://openai.com/sora', category: 'Video' },
+        { name: 'Gemini 1.5 Pro', url: 'https://gemini.google.com', category: 'Multimodal' },
+        { name: 'Mistral Large', url: 'https://mistral.ai', category: 'OpenSource' },
+        { name: 'Groq', url: 'https://groq.com', category: 'Hardware' },
+        { name: 'Llama 3', url: 'https://meta.ai', category: 'LLM' },
+        { name: 'Sunno AI', url: 'https://suno.com', category: 'Music' }
     ];
+
+    // 論調の多角化：読者を飽きさせないための演出
+    const personas = [
+        "Skeptical Tech Journalist (Focus on risks and ethics)",
+        "Futurist Visionary (Focus on long-term evolution)",
+        "Practical Software Engineer (Focus on implementation and ROI)",
+        "Academic Researcher (Focus on data and architecture)"
+    ];
+
     const tool = toolData[Math.floor(Math.random() * toolData.length)];
+    const persona = personas[Math.floor(Math.random() * personas.length)];
     
-    const prompt = `Write a deep-dive analysis. Topic: ${tool.name}. 
+    const prompt = `Write a professional deep-dive essay as a ${persona}. 
+    Topic: ${tool.name}.
+    Style: High-end, sophisticated, strictly no "AI-generated" cliches (no "unlocking potential", "game changer").
     Structure:
-    - # Title
-    - > Summary.
-    - ## The Silver Lining
-    - ## The Hidden Friction
-    - ## Editorial Verdict
+    - # Title (Academic and bold)
+    - > Summary (One paragraph, deep insight)
+    - ## The Silver Lining (Technical advantages)
+    - ## The Hidden Friction (Structural flaws or ethics)
+    - ## Editorial Verdict (Final rating)
     Important: End with these two tags:
     [TARGET_URL: ${tool.url}]
     [IMG_KEYWORD: ${tool.category}]`;
 
     const data = JSON.stringify({
         model: "gpt-4o",
-        messages: [{role: "system", content: "Senior tech editor. Provide high-end essay."}, {role: "user", content: prompt}],
-        max_tokens: 1500
+        messages: [{role: "system", content: "You are an elite technology critic. Your prose is sharp, analytical, and devoid of common AI tropes."}, {role: "user", content: prompt}],
+        max_tokens: 1800
     });
 
     const options = {
@@ -46,12 +64,13 @@ async function generateArticle() {
                 if (!fs.existsSync(blogDir)) fs.mkdirSync(blogDir, { recursive: true });
                 fs.writeFileSync(path.join(blogDir, `ai-article-${timestamp}.md`), content);
                 updateSitemap();
-            } catch (e) { process.exit(1); }
+                console.log(`Generated: ${tool.name} as ${persona}`);
+            } catch (e) { console.error(e); process.exit(1); }
         });
     });
     req.write(data); req.end();
 }
-// (updateSitemapは変更なし)
+
 function updateSitemap() {
     const baseUrl = 'https://ai-review-site-nine.vercel.app';
     const blogDir = 'content/posts';
@@ -63,4 +82,5 @@ function updateSitemap() {
     sitemap += '</urlset>';
     fs.writeFileSync('public/sitemap.xml', sitemap);
 }
+
 generateArticle();
