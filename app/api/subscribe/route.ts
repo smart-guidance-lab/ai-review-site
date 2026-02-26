@@ -4,14 +4,15 @@ import path from 'path';
 
 export async function POST(request: Request) {
     try {
-        const { email } = await request.json();
+        const { email, topInterests } = await request.json(); // フロントから興味タグを受け取る
         const filePath = path.join(process.cwd(), 'emails.txt');
         
-        // メールアドレスを追記（簡易的なDB代わり）
-        fs.appendFileSync(filePath, `${new Date().toISOString()}, ${email}\n`);
+        // 形式: タイムスタンプ, メール, 興味タグ
+        const record = `${new Date().toISOString()}, ${email}, [${topInterests.join('|')}]\n`;
+        fs.appendFileSync(filePath, record);
         
-        return NextResponse.json({ message: 'Address Captured Successfully' }, { status: 200 });
+        return NextResponse.json({ message: 'Segmented Lead Captured' }, { status: 200 });
     } catch (error) {
-        return NextResponse.json({ message: 'Registration Failed' }, { status: 500 });
+        return NextResponse.json({ message: 'Process Error' }, { status: 500 });
     }
 }
