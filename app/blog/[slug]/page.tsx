@@ -5,103 +5,91 @@ import { Metadata } from 'next';
 
 const POSTS_DIR = path.join(process.cwd(), 'content', 'posts');
 
-// SEOメタデータの動的生成：Google検索結果の外観を制御
+function getAllPosts() {
+  if (!fs.existsSync(POSTS_DIR)) return [];
+  return fs.readdirSync(POSTS_DIR)
+    .filter(f => f.endsWith('.md'))
+    .map(f => ({
+      slug: f.replace('.md', ''),
+      mtime: fs.statSync(path.join(POSTS_DIR, f)).mtimeMs,
+      title: fs.readFileSync(path.join(POSTS_DIR, f), 'utf8').match(/# (.*)/)?.[1] || "Untitled Report"
+    }))
+    .sort((a, b) => b.mtime - a.mtime);
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> | { slug: string } }): Promise<Metadata> {
   const resolvedParams = await params;
   const filePath = path.join(POSTS_DIR, `${resolvedParams.slug}.md`);
   if (!fs.existsSync(filePath)) return { title: "Not Found" };
-
   const content = fs.readFileSync(filePath, 'utf8');
   const title = content.match(/# (.*)/)?.[1] || "AI Insight Report";
-  
-  // 本文の「Summary:」以降から150文字を抽出してディスクリプションにする
   const summaryMatch = content.match(/Summary:\s*(.*)/i);
-  const description = summaryMatch 
-    ? summaryMatch[1].split(/[.!?。]/)[0].slice(0, 150) + '...'
-    : `${title}に関する詳細な技術分析と将来予測。AI Insight Globalによる自律的レポート。`;
-
-  return {
-    title: `${title} | AI Insight Global`,
-    description: description,
-    openGraph: {
-      title: title,
-      description: description,
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: title,
-      description: description,
-    },
-  };
+  const description = summaryMatch ? summaryMatch[1].slice(0, 150) + '...' : `${title} Analysis.`;
+  return { title: `${title} | AI Insight Global`, description };
 }
 
 export async function generateStaticParams() {
-  if (!fs.existsSync(POSTS_DIR)) return [];
-  return fs.readdirSync(POSTS_DIR).filter(f => f.endsWith('.md')).map(f => ({ slug: f.replace('.md', '') }));
+  return getAllPosts().map(p => ({ slug: p.slug }));
 }
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> | { slug: string } }) {
   const resolvedParams = await params;
-  const filePath = path.join(POSTS_DIR, `${resolvedParams.slug}.md`);
+  const posts = getAllPosts();
+  const currentIndex = posts.findIndex(p => p.slug === resolvedParams.slug);
+  const nextPost = posts[(currentIndex + 1) % posts.length]; // 循環して次の記事へ
 
+  const filePath = path.join(POSTS_DIR, `${resolvedParams.slug}.md`);
   if (!fs.existsSync(filePath)) notFound();
   const content = fs.readFileSync(filePath, 'utf8');
-
-  const urlMatch = content.match(/\[TARGET_URL:\s*(.*?)\]/);
-  const targetUrl = urlMatch ? urlMatch[1].trim() : '/';
+  const targetUrl = content.match(/\[TARGET_URL:\s*(.*?)\]/)?.[1] || '/';
   const title = content.match(/# (.*)/)?.[1] || "AI Insight Report";
 
-  // ビジュアル用のハッシュ生成
+  // ビジュアルハッシュ
   const hash = title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const hue1 = hash % 360;
-  const hue2 = (hash * 1.618) % 360;
-  const angle = (hash * 13) % 360;
-  const saturation = 15 + (hash % 20);
+  const hue = hash % 360;
 
   return (
-    <article style={{ paddingBottom: '10rem', maxWidth: '100%', margin: '0 auto', fontFamily: '"Georgia", serif', color: '#111', lineHeight: '1.8', backgroundColor: '#fff' }}>
+    <article style={{ backgroundColor: '#fff', color: '#111', fontFamily: '"Georgia", serif', minHeight: '100vh' }}>
       
-      {/* 構造化データ: 検索結果にリッチリザルトを表示させる */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "TechArticle",
-        "headline": title,
-        "description": content.match(/Summary:\s*(.*)/i)?.[1].slice(0, 200),
-        "author": { "@type": "Organization", "name": "AI Insight Global" },
-        "publisher": { "@type": "Organization", "name": "AI Insight Global" },
-        "datePublished": fs.statSync(filePath).birthtime.toISOString()
-      })}} />
-
-      {/* ジェネレーティブ・ヘッダー */}
+      {/* ヘッダービジュアル */}
       <div style={{
-        background: `linear-gradient(${angle}deg, hsl(${hue1}, ${saturation}%, 12%) 0%, hsl(${hue2}, ${saturation}%, 4%) 100%)`,
-        height: '65vh', minHeight: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden'
+        background: `linear-gradient(135deg, hsl(${hue}, 20%, 10%) 0%, #000 100%)`,
+        height: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden'
       }}>
-        <div style={{ position: 'absolute', width: '160%', height: '160%', background: `radial-gradient(circle at ${hash % 100}% ${ (hash * 7) % 100}%, hsla(${hue1}, 100%, 65%, 0.05) 0%, transparent 60%)`, filter: 'blur(100px)' }} />
-        <div style={{ position: 'relative', zIndex: 2, width: '90%', maxWidth: '1200px', padding: '0 5%' }}>
-          <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '10px', marginBottom: '2.5rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>Node 0x{hash.toString(16).toUpperCase()}</p>
-          <h1 style={{ fontSize: 'clamp(2.5rem, 9vw, 6.5rem)', fontFamily: '"Times New Roman", serif', lineHeight: '0.92', fontWeight: 'normal', margin: 0, letterSpacing: '-5px', color: '#fff' }}>{title}</h1>
+        <div style={{ position: 'absolute', width: '100%', height: '100%', opacity: 0.4, background: `radial-gradient(circle at 50% 50%, hsl(${hue}, 100%, 50%, 0.1), transparent)` }} />
+        <div style={{ position: 'relative', zIndex: 10, width: '90%', maxWidth: '1000px', textAlign: 'left' }}>
+          <span style={{ color: 'rgba(255,255,255,0.4)', letterSpacing: '10px', textTransform: 'uppercase', fontSize: '0.8rem' }}>Sequence 0x{hash.toString(16)}</span>
+          <h1 style={{ color: '#fff', fontSize: 'clamp(2.5rem, 8vw, 6rem)', margin: '1rem 0', lineHeight: 1, letterSpacing: '-3px' }}>{title}</h1>
         </div>
       </div>
 
-      <div style={{ padding: '8rem 2rem 0', maxWidth: '850px', margin: '0 auto' }}>
-        <nav style={{ marginBottom: '10rem' }}>
-          <a href="/" style={{ textDecoration: 'none', color: '#000', fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '5px', borderBottom: '4px solid #000', paddingBottom: '12px' }}>&larr; Return to Archives</a>
+      <div style={{ maxWidth: '850px', margin: '0 auto', padding: '6rem 2rem' }}>
+        <nav style={{ marginBottom: '8rem', borderBottom: '1px solid #eee', paddingBottom: '2rem' }}>
+          <a href="/" style={{ color: '#000', textDecoration: 'none', fontWeight: 'bold', letterSpacing: '2px', fontSize: '0.8rem' }}>&larr; INDEX ARCHIVE</a>
         </nav>
 
-        <section>
+        {/* 本文 */}
+        <section style={{ fontSize: '1.4rem', lineHeight: '2', color: '#222', textAlign: 'justify' }}>
           {content.split('\n').map((line, i) => {
-            if (line.startsWith('# ') || line.startsWith('[') || line.trim() === '') return null;
-            if (line.startsWith('> ')) return <blockquote key={i} style={{ fontSize: '1.9rem', fontStyle: 'italic', color: '#000', borderLeft: '20px solid #000', paddingLeft: '4rem', margin: '7rem 0', lineHeight: '1.1', fontFamily: '"Times New Roman", serif' }}>{line.replace('> ', '')}</blockquote>;
-            if (line.startsWith('## ')) return <h2 key={i} style={{ fontSize: '3.8rem', paddingTop: '5rem', marginTop: '12rem', marginBottom: '3.5rem', fontFamily: '"Times New Roman", serif', fontWeight: 'normal', borderTop: '10px solid #000', letterSpacing: '-3px' }}>{line.replace('## ', '')}</h2>;
-            return <p key={i} style={{ marginBottom: '3rem', fontSize: '1.5rem', textAlign: 'justify', color: '#111' }}>{line}</p>;
+            if (line.startsWith('# ') || line.startsWith('[')) return null;
+            if (line.startsWith('## ')) return <h2 key={i} style={{ fontSize: '3rem', marginTop: '8rem', marginBottom: '2rem', borderTop: '8px solid #000', paddingTop: '2rem' }}>{line.replace('## ', '')}</h2>;
+            if (line.startsWith('> ')) return <blockquote key={i} style={{ margin: '5rem 0', paddingLeft: '3rem', borderLeft: '15px solid #000', fontStyle: 'italic', fontSize: '1.8rem' }}>{line.replace('> ', '')}</blockquote>;
+            return line.trim() ? <p key={i} style={{ marginBottom: '2.5rem' }}>{line}</p> : null;
           })}
         </section>
 
-        <footer style={{ marginTop: '15rem', padding: '15rem 2.5rem', backgroundColor: '#000', color: '#fff', textAlign: 'center' }}>
-          <h3 style={{ fontFamily: '"Times New Roman", serif', fontSize: '4rem', marginBottom: '3rem', fontWeight: 'normal' }}>The Verdict</h3>
-          <a href={targetUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', border: '1px solid #fff', color: '#fff', padding: '1.8rem 10rem', textDecoration: 'none', fontSize: '1rem', fontWeight: 'bold', letterSpacing: '12px', textTransform: 'uppercase' }}>Access Portal</a>
+        {/* 【回遊リンク】Next Reportへの強力な導線 */}
+        <div style={{ marginTop: '15rem', padding: '6rem', backgroundColor: '#f9f9f9', border: '1px solid #eee', textAlign: 'center' }}>
+          <span style={{ fontSize: '0.8rem', letterSpacing: '5px', color: '#888', textTransform: 'uppercase' }}>Next Intelligence Report</span>
+          <h4 style={{ fontSize: '2.5rem', margin: '1.5rem 0 3rem 0', lineHeight: 1.2 }}>{nextPost.title}</h4>
+          <a href={`/blog/${nextPost.slug}`} style={{
+            display: 'inline-block', backgroundColor: '#000', color: '#fff', padding: '1.5rem 5rem', textDecoration: 'none', fontWeight: 'bold', letterSpacing: '3px'
+          }}>CONTINUE ANALYSIS →</a>
+        </div>
+
+        <footer style={{ marginTop: '10rem', textAlign: 'center', opacity: 0.3 }}>
+          <p>© 2026 AI Insight Global / Node {hash}</p>
+          <a href={targetUrl} style={{ color: '#000' }}>Official Portal Source</a>
         </footer>
       </div>
     </article>
