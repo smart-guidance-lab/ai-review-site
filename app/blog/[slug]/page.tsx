@@ -1,90 +1,72 @@
-import fs from 'fs';
-import path from 'path';
-import { notFound } from 'next/navigation';
+"use client"; // クライアントサイドでの動きが必要なため追加
+import React, { useState, useEffect } from 'react';
+/* サーバーサイドのfsなどは、Next.js 13+のサーバーコンポーネントとクライアントコンポーネントの分離が必要ですが、
+   ここでは一つのファイルで「究極のUI」をシミュレートする構成を示します。 */
 
-const POSTS_DIR = path.join(process.cwd(), 'content', 'posts');
+export default function PostPage({ params, content, title, hash, score }: any) {
+  const [showPopup, setShowPopup] = useState(false);
+  const targetUrl = "https://www.perplexity.ai";
 
-export default async function PostPage({ params }: { params: Promise<{ slug: string }> | { slug: string } }) {
-  const resolvedParams = await params;
-  const filePath = path.join(POSTS_DIR, `${resolvedParams.slug}.md`);
-  if (!fs.existsSync(filePath)) notFound();
-  const content = fs.readFileSync(filePath, 'utf8');
-
-  const title = content.match(/# (.*)/)?.[1] || "AI Analysis";
-  const langMatch = content.match(/\[LANG:\s*(.*?)\]/);
-  const lang = langMatch ? langMatch[1].trim() : 'English';
-  
-  // 【重要：収益化】ここにあなたのアフィリエイトIDまたは識別子を挿入
-  const AFFILIATE_ID = "YOUR_OWN_ID"; 
-  const targetUrl = `https://www.perplexity.ai/pro?referral_code=${AFFILIATE_ID}`;
-  
-  const hash = title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const score = 85 + (hash % 15);
-
-  const i18n: any = {
-    English: { cta: "Claim Your AI Edge", disclaimer: "ALGORITHMIC AUDIT" },
-    Japanese: { cta: "AIの優位性を手に入れる", disclaimer: "アルゴリズム監査済み" }
-  };
-  const ui = i18n[lang] || i18n.English;
-
-  // 動画生成AI（Veo等）に読み込ませるための構造化データ
-  const videoSchema = {
-    "@context": "https://schema.org",
-    "@type": "VideoObject",
-    "name": `${title} - Analysis Video`,
-    "description": content.slice(0, 150),
-    "thumbnailUrl": `https://dummyimage.com/1200x630/000/00ff41&text=${title}`,
-    "uploadDate": new Date().toISOString()
-  };
+  useEffect(() => {
+    // 離脱検知（マウスが画面上部に出た時にポップアップ）
+    const handleMouseOut = (e: MouseEvent) => {
+      if (e.clientY < 0) {
+        setShowPopup(true);
+        window.removeEventListener('mouseout', handleMouseOut);
+      }
+    };
+    window.addEventListener('mouseout', handleMouseOut);
+    return () => window.removeEventListener('mouseout', handleMouseOut);
+  }, []);
 
   return (
-    <article style={{ backgroundColor: '#fff', color: '#111', fontFamily: '"Georgia", serif', minHeight: '100vh' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoSchema) }} />
+    <article style={{ backgroundColor: '#fff', color: '#111', fontFamily: '"Georgia", serif', minHeight: '100vh', position: 'relative' }}>
       
-      {/* 権威ヘッダー：収益化ボタンを強調 */}
-      <div style={{ background: '#000', color: '#fff', padding: '4rem 2rem', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <h1 style={{ fontSize: '1.5rem', margin: 0 }}>{title}</h1>
-            <span style={{ color: '#00ff41', fontSize: '0.7rem' }}>VERIFIED SCORE: {score}%</span>
+      {/* 既存の権威UI（前回のロジックを継承） */}
+      <header style={{ background: '#000', color: '#fff', padding: '4rem 2rem' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h1 style={{ fontSize: '2rem' }}>{title}</h1>
+          <div style={{ border: '2px solid #00ff41', padding: '0.5rem 1rem', color: '#00ff41', fontWeight: 'bold' }}>SCORE: {score}%</div>
+        </div>
+      </header>
+
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 2rem', fontSize: '1.2rem', lineHeight: '1.8' }}>
+        {/* 本文表示 */}
+        <section dangerouslySetInnerHTML={{ __html: content }} />
+        
+        {/* メインCTA */}
+        <div style={{ marginTop: '5rem', textAlign: 'center' }}>
+          <a href={targetUrl} target="_blank" style={{ display: 'inline-block', background: '#000', color: '#fff', padding: '1.5rem 3rem', textDecoration: 'none', fontWeight: 'bold', borderRadius: '50px' }}>
+            START ANALYSIS WITH PERPLEXITY &rarr;
+          </a>
+        </div>
+      </div>
+
+      {/* 究極の「リード獲得」ポップアップ */}
+      {showPopup && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zValues: 1000
+        }}>
+          <div style={{
+            backgroundColor: '#fff', padding: '4rem', maxWidth: '600px', textAlign: 'center', position: 'relative', border: '10px solid #00ff41'
+          }}>
+            <button onClick={() => setShowPopup(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', border: 'none', background: 'none', fontSize: '2rem', cursor: 'pointer' }}>&times;</button>
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>WAIT! DON'T MISS THIS.</h2>
+            <p style={{ fontSize: '1.2rem', color: '#666', marginBottom: '2rem' }}>
+              Download our <strong>"2026 Secret AI Tool Comparison Matrix (PDF)"</strong>. 
+              We reveal the tools that 99% of people are missing.
+            </p>
+            <form onSubmit={(e) => { e.preventDefault(); alert('Lead Captured. (Integration Required)'); setShowPopup(false); }}>
+              <input type="email" placeholder="Enter your best email" required style={{ width: '100%', padding: '1rem', marginBottom: '1rem', border: '1px solid #ccc' }} />
+              <button type="submit" style={{ width: '100%', padding: '1.5rem', background: '#00ff41', color: '#000', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}>
+                SEND ME THE PDF NOW
+              </button>
+            </form>
+            <p style={{ marginTop: '1rem', fontSize: '0.7rem', color: '#999' }}>* We value your privacy. No spam, only intelligence.</p>
           </div>
-          <a href={targetUrl} target="_blank" rel="noopener noreferrer" style={{
-            backgroundColor: '#00ff41', color: '#000', padding: '0.8rem 1.5rem', textDecoration: 'none', fontWeight: 'bold', borderRadius: '4px', animation: 'pulse 2s infinite'
-          }}>
-            {ui.cta.toUpperCase()}
-          </a>
         </div>
-      </div>
-
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 2rem' }}>
-        {/* バイオメトリクス表示（中略・前回のロジックを継承） */}
-        <section style={{ fontSize: '1.4rem', lineHeight: '2', margin: '4rem 0' }}>
-          {content.split('\n').map((line, i) => {
-            if (line.startsWith('# ') || line.startsWith('[')) return null;
-            return <p key={i} style={{ marginBottom: '2.5rem' }}>{line}</p>;
-          })}
-        </section>
-
-        {/* マルチモーダル・トラフィック爆撃用導線 */}
-        <div style={{ border: '2px dashed #00ff41', padding: '2rem', textAlign: 'center', marginBottom: '4rem' }}>
-          <p style={{ fontSize: '0.8rem', color: '#666' }}>[MULTIMODAL BROADCAST: ACTIVE]</p>
-          <p>Watch the full visual breakdown on our social channels.</p>
-        </div>
-
-        {/* 最終収益リンク */}
-        <div style={{ padding: '6rem 2rem', background: '#000', color: '#fff', textAlign: 'center', borderRadius: '10px' }}>
-          <h2 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Ready to Initiate?</h2>
-          <a href={targetUrl} target="_blank" rel="noopener noreferrer" style={{
-            fontSize: '1.8rem', color: '#00ff41', textDecoration: 'none', borderBottom: '2px solid #00ff41'
-          }}>
-            GO TO SOURCE NODE &rarr;
-          </a>
-        </div>
-      </div>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,65,0.7); } 70% { box-shadow: 0 0 0 15px rgba(0,255,65,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,65,0); } }
-      `}} />
+      )}
     </article>
   );
 }
