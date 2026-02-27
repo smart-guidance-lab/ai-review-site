@@ -18,7 +18,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   const score = 88 + (hash % 10);
   const auditID = `LDN-${hash.toString(16).toUpperCase()}-2026`;
 
-  const GLOBAL_PAYMENT_URL = "https://buy.stripe.com/your_actual_link"; // 実際のStripeリンクに置き換え
+  const GLOBAL_PAYMENT_URL = "https://buy.stripe.com/6oUcN41D9ggo0a4efg8so03"; // 実際のStripeリンクに置き換え
 
   // インフォグラフィックの存在チェック
   const infographicPath = `/infographics/${resolvedParams.slug}.png`;
