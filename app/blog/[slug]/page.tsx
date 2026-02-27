@@ -3,6 +3,7 @@ import path from 'path';
 import { notFound } from 'next/navigation';
 
 const POSTS_DIR = path.join(process.cwd(), 'content', 'posts');
+const INFOGRAPHICS_DIR = path.join(process.cwd(), 'public/infographics');
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> | { slug: string } }) {
   const resolvedParams = await params;
@@ -17,8 +18,11 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   const score = 88 + (hash % 10);
   const auditID = `LDN-${hash.toString(16).toUpperCase()}-2026`;
 
-  // 【重要】ここに作成したStripeのURLを貼り付けてください
-  const GLOBAL_PAYMENT_URL = "https://buy.stripe.com/6oUcN41D9ggo0a4efg8so03";
+  const GLOBAL_PAYMENT_URL = "https://buy.stripe.com/your_actual_link"; // 実際のStripeリンクに置き換え
+
+  // インフォグラフィックの存在チェック
+  const infographicPath = `/infographics/${resolvedParams.slug}.png`;
+  const hasInfographic = fs.existsSync(path.join(INFOGRAPHICS_DIR, `${resolvedParams.slug}.png`));
 
   return (
     <article style={{ maxWidth: '850px', margin: '0 auto', padding: '6rem 2rem', backgroundColor: '#fff', color: '#111', boxShadow: '0 0 50px rgba(0,0,0,0.02)' }}>
@@ -30,6 +34,13 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           <span>NODE: {auditID}</span>
         </div>
       </header>
+
+      {hasInfographic && (
+        <div style={{ margin: '4rem 0', textAlign: 'center' }}>
+          <img src={infographicPath} alt={`Infographic: ${title}`} style={{ maxWidth: '100%', height: 'auto', border: '1px solid #eee' }} />
+          <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '1rem' }}>Share this visual insight: <a href={`https://www.instagram.com/aiinsightglobal?igsh=${resolvedParams.slug}`} target="_blank" rel="noopener noreferrer" style={{ color: '#007bff' }}>Instagram</a> | <a href={`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(`https://your-domain.com/blog/${resolvedParams.slug}`)}&media=${encodeURIComponent(`https://your-domain.com${infographicPath}`)}&description=${encodeURIComponent(title)}`} target="_blank" rel="noopener noreferrer" style={{ color: '#cb2027' }}>Pinterest</a></p>
+        </div>
+      )}
 
       <section style={{ fontSize: '1.2rem', lineHeight: '1.8', textAlign: 'justify', marginBottom: '6rem' }}>
         {body.split('\n').map((line, i) => (
