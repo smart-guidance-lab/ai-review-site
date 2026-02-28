@@ -1,7 +1,7 @@
 // lib/fulfillment-logic.ts (完全版)
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.re_2xGtYXMT_C44pRbUcotsios4duBz1G7ez);
 
 export async function processFulfillment(email: string, amount: number) {
   const tierConfig: Record<number, { name: string; file: string }> = {
