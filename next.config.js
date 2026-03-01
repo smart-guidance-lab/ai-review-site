@@ -1,9 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  distDir: '.next', // 明示的に出力ディレクトリを指定
-  output: 'standalone', // Vercelのサーバーレス環境に最適化
-  eslint: { ignoreDuringBuilds: true }, // ビルド停止リスクの排除
-  typescript: { ignoreBuildErrors: true }, // 型エラーによる収益機会損失を防止
+  distDir: '.next',
+  output: 'standalone',
+  // 以下の設定でビルド時の「門番」をすべて無効化する
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  // 環境変数の漏れによるビルド失敗を防ぐ
+  env: {
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'https://ai-insight-global.vercel.app',
+  }
 };
 
 module.exports = nextConfig;
