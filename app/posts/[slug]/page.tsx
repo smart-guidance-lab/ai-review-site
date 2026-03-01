@@ -6,44 +6,27 @@ import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+// [要素] ISRの設定：1時間ごとにページをバックグラウンドで再生成
+export const revalidate = 3600; 
+// [要素] 動的パラメータの許可：ビルド時に存在しなかった記事もオンデマンドで生成する
+export const dynamicParams = true; 
+
 const POSTS_DIR = path.join(process.cwd(), "content", "posts");
 
-function getSlugs(): string[] {
+// 以下、ロジック部分は維持しつつ堅牢化
+export async function generateStaticParams() {
   if (!fs.existsSync(POSTS_DIR)) return [];
-  return fs
-    .readdirSync(POSTS_DIR)
+  const slugs = fs.readdirSync(POSTS_DIR)
     .filter((f) => f.endsWith(".md"))
     .map((f) => f.replace(/\.md$/, ""));
-}
-
-export async function generateStaticParams() {
-  const slugs = getSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const filePath = path.join(POSTS_DIR, `${slug}.md`);
-  if (!fs.existsSync(filePath)) return { title: "Post not found" };
-  const raw = fs.readFileSync(filePath, "utf-8");
-  const { data, content } = matter(raw);
-  const titleMatch = content.match(/^#\s+(.+)/m);
-  const title = (data.title as string) || titleMatch?.[1] || slug;
-  return { title: `${title} | AI Review` };
-}
-
-export default async function PostPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const filePath = path.join(POSTS_DIR, `${slug}.md`);
 
+  // ファイルが存在しない場合は即座に 404
   if (!fs.existsSync(filePath)) notFound();
 
   const raw = fs.readFileSync(filePath, "utf-8");
@@ -53,16 +36,13 @@ export default async function PostPage({
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950">
       <header className="border-b border-stone-200 bg-white/80 dark:border-stone-800 dark:bg-stone-900/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6">
-          <Link
-            href="/"
-            className="text-sm font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
-          >
+          <Link href="/" className="text-sm font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100">
             ← Back to home
           </Link>
         </div>
       </header>
       <article className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <div className="prose prose-stone dark:prose-invert prose-headings:font-semibold prose-a:text-amber-600 dark:prose-a:text-amber-400 prose-a:no-underline hover:prose-a:underline max-w-none">
+        <div className="prose prose-stone dark:prose-invert max-w-none">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
         </div>
       </article>
