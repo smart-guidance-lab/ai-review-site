@@ -18,7 +18,10 @@
     "resend": "latest",
     "stripe": "latest",
     "googleapis": "latest",
-    "react-markdown": "latest"
+    "react-markdown": "latest",
+    "gray-matter": "latest",
+    "remark-gfm": "latest",
+    "axios": "latest"
   },
   "devDependencies": {
     "@types/node": "22.10.2",
