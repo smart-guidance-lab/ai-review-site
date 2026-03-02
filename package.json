@@ -33,7 +33,4 @@
     "typescript": "5.7.2",
     "@tailwindcss/postcss": "latest"
   }
-  "scripts": {
-  "post-and-index": "node scripts/generate_article.js && node scripts/notify-google.js"
-}
 }
