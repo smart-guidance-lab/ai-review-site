@@ -21,15 +21,16 @@
     "react-markdown": "latest",
     "gray-matter": "latest",
     "remark-gfm": "latest",
-    "axios": "latest"
+    "axios": "latest",
+    "tailwindcss": "latest",
+    "postcss": "latest",
+    "autoprefixer": "latest"
   },
   "devDependencies": {
     "@types/node": "22.10.2",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.1",
     "typescript": "5.7.2",
-    "tailwindcss": "latest",
-    "@tailwindcss/postcss": "latest",
-    "postcss": "latest"
+    "@tailwindcss/postcss": "latest"
   }
 }
