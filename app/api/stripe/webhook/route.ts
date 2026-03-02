@@ -2,25 +2,26 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import Stripe from 'stripe';
 
-// 初期化
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-01-27' as any, // 2026年時点の最新安定版
+  apiVersion: '2025-01-27' as any, // 2026年最新安定版
 });
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   const body = await req.text(); // 署名検証には raw body が必須
-  const signature = req.headers.get('stripe-signature')!;
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+  const sig = req.headers.get('stripe-signature');
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   let event: Stripe.Event;
 
   try {
-    // 署名検証：これが「究極の防御」
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    if (!sig || !webhookSecret) throw new Error('Missing signature or secret');
+    // 署名検証：Stripeからの正式なリクエストかを確認
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err: any) {
-    console.error(`❌ Webhook Signature Verification Failed: ${err.message}`);
-    return NextResponse.json({ error: 'Invalid Signature' }, { status: 400 });
+    console.error(`❌ Webhook Error: ${err.message}`);
+    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
   }
 
   // 成功イベントの処理
@@ -33,17 +34,12 @@ export async function POST(req: Request) {
         await resend.emails.send({
           from: 'Intelligence <onboarding@resend.dev>',
           to: customerEmail,
-          subject: '【確定】Strategic Intelligence Report',
-          html: `
-            <h1>Investment Confirmed.</h1>
-            <p>Thank you for your purchase.</p>
-            <p><strong>Order ID:</strong> ${session.id}</p>
-            <p>Your access to the DAO/Core Intelligence is now fully activated.</p>
-          `
+          subject: 'Your Strategic Intelligence Report is Ready',
+          html: `<strong>Thank you for your investment.</strong><br/>Your access to the Intelligence is now activated.`
         });
-        console.log(`✅ Fulfillment Success: ${customerEmail}`);
-      } catch (sendErr) {
-        console.error("❌ Resend Error:", sendErr);
+        console.log(`✅ Fulfillment completed for: ${customerEmail}`);
+      } catch (emailErr) {
+        console.error("Email Error:", emailErr);
       }
     }
   }
