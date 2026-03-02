@@ -25,31 +25,23 @@ const tool = toolData[Math.floor(Math.random() * toolData.length)];
 
 // 言語に応じたシステム指示の最適化
 
-const prompt = `Write a professional deep-dive essay in ${lang}.
-
-Topic: ${tool.name}.
-
-Style: Elite technology critic, analytical, and authoritative.
-
-Structure:
-
-- # Title
-
-- > Summary (One paragraph)
-
-- ## Analysis Part 1
-
-- ## Analysis Part 2
-
-- ## Editorial Verdict
-
-Important: End with these tags:
-
-[TARGET_URL: ${tool.url}]
-
-[IMG_KEYWORD: ${tool.category}]
-
-[LANG: ${lang}]`;
+const prompt = `Write a high-end strategic audit in ${lang}.
+    Topic: ${tool.name}.
+    Style: Brutalist, elitist, deeply analytical.
+    Structure:
+    - # ${tool.name} Strategic Intelligence Report
+    - > [EXECUTIVE SUMMARY] Why this matters for your 2026 ROI.
+    - ## 1. ARCHITECTURAL DOMINANCE (Technical analysis)
+    - ## 2. MARKET DISRUPTION (Competitive impact)
+    - ## 3. FATAL FLAWS (Hidden risks)
+    - ## FINAL VERDICT: TO INVEST OR TO IGNORE?
+    
+    Important: The tone must make the reader feel that without the "CORE" or "ULTIMATE" tier intelligence, they are losing money. 
+    Use phrases like "The asymmetry of information here is dangerous."
+    End with these meta-tags:
+    [TARGET_URL: ${tool.url}]
+    [IMG_KEYWORD: ${tool.category}]
+    [LANG: ${lang}]`;
 
 
 
