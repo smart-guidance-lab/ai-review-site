@@ -1,43 +1,52 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import Stripe from 'stripe';
 
-// ビルド時のエラーを回避するため、実行時にのみ初期化
-const getResend = () => {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) {
-    console.error("CRITICAL: RESEND_API_KEY is not defined in environment variables.");
-    return null;
-  }
-  return new Resend(key);
-};
+// 初期化
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-01-27' as any, // 2026年時点の最新安定版
+});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
-  const resend = getResend();
-  if (!resend) return NextResponse.json({ error: "Configuration Error" }, { status: 500 });
+  const body = await req.text(); // 署名検証には raw body が必須
+  const signature = req.headers.get('stripe-signature')!;
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
+  let event: Stripe.Event;
 
   try {
-    const payload = await req.json();
-    const event = payload.type;
-
-    if (event === 'checkout.session.completed') {
-      const session = payload.data.object;
-      const customerEmail = session.customer_details.email;
-
-      // 自動サンクスメール & 商品配送
-      await resend.emails.send({
-        from: 'Intelligence <onboarding@resend.dev>',
-        to: customerEmail,
-        subject: 'Your Strategic Intelligence Report is Ready',
-        html: `<strong>Thank you for your investment.</strong><br/>Your access to the DAO/Core Intelligence is now activated.`
-      });
-      
-      console.log(`Fulfillment completed for: ${customerEmail}`);
-      return NextResponse.json({ fulfilled: true });
-    }
-
-    return NextResponse.json({ received: true });
-  } catch (err) {
-    console.error("Webhook Error:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    // 署名検証：これが「究極の防御」
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+  } catch (err: any) {
+    console.error(`❌ Webhook Signature Verification Failed: ${err.message}`);
+    return NextResponse.json({ error: 'Invalid Signature' }, { status: 400 });
   }
+
+  // 成功イベントの処理
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const customerEmail = session.customer_details?.email;
+
+    if (customerEmail) {
+      try {
+        await resend.emails.send({
+          from: 'Intelligence <onboarding@resend.dev>',
+          to: customerEmail,
+          subject: '【確定】Strategic Intelligence Report',
+          html: `
+            <h1>Investment Confirmed.</h1>
+            <p>Thank you for your purchase.</p>
+            <p><strong>Order ID:</strong> ${session.id}</p>
+            <p>Your access to the DAO/Core Intelligence is now fully activated.</p>
+          `
+        });
+        console.log(`✅ Fulfillment Success: ${customerEmail}`);
+      } catch (sendErr) {
+        console.error("❌ Resend Error:", sendErr);
+      }
+    }
+  }
+
+  return NextResponse.json({ received: true }, { status: 200 });
 }
