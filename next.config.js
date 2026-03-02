@@ -1,10 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // タイムアウトを避けるため、出力を標準に戻す
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
-  swcMinify: true, // 高速コンパイルを有効化
-  // 必要最小限の設定に絞り、ビルド負荷を軽減
+  // swcMinifyはNext.js 15ではデフォルトで有効であり、設定項目から削除（警告の原因）
 };
 
 module.exports = nextConfig;
