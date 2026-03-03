@@ -7,7 +7,8 @@ export async function POST(req: Request) {
   const resendKey = process.env.RESEND_API_KEY;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const sig = req.headers.get('stripe-signature');
-  const baseUrl = "https://ai-review-site-nine.vercel.app"; // あなたのドメイン
+  // 【重要】独自ドメインに修正
+  const baseUrl = "https://future-audit.org"; 
 
   if (!stripeKey || !resendKey || !webhookSecret || !sig) {
     return NextResponse.json({ error: "Config Error" }, { status: 400 });
@@ -24,7 +25,6 @@ export async function POST(req: Request) {
       const customerEmail = session.customer_details?.email;
       const amount = session.amount_total ? session.amount_total / 100 : 0;
 
-      // 金額に応じたファイル名の出し分け（publicフォルダ内の実ファイル名と一致させる）
       let downloadUrl = "";
       let productName = "";
 
@@ -43,22 +43,16 @@ export async function POST(req: Request) {
         await resend.emails.send({
           from: 'Future Audit Intelligence <info@future-audit.org>',
           to: customerEmail,
-          subject: `[Secure Link] Your ${productName} is Ready`,
+          subject: `[Confidential] Your ${productName} Access`,
           html: `
-            <div style="font-family: 'Courier New', Courier, monospace; max-width: 600px; margin: auto; padding: 40px; background-color: #f4f4f4; color: #000; border: 2px solid #000;">
-              <h1 style="font-size: 24px; text-transform: uppercase; letter-spacing: 2px;">Verification Complete</h1>
-              <p style="border-top: 1px solid #000; padding-top: 20px;">ID: ${session.id.slice(-12)}</p>
-              <p>Product: <strong>${productName}</strong></p>
-              
-              <div style="margin: 30px 0; background: #fff; padding: 20px; border: 1px dashed #000; text-align: center;">
-                <p style="font-size: 12px; margin-bottom: 10px;">SECURE DOWNLOAD LINK:</p>
-                <a href="${downloadUrl}" style="background: #000; color: #fff; padding: 15px 25px; text-decoration: none; display: inline-block; font-weight: bold;">DOWNLOAD REPORT</a>
+            <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 1px solid #eee;">
+              <h2 style="color: #333;">Verification Successful.</h2>
+              <p>Your acquisition of <strong>${productName}</strong> is confirmed.</p>
+              <div style="margin: 20px 0; padding: 20px; background: #f9f9f9; border-left: 4px solid #000;">
+                <p style="margin: 0; font-size: 14px;">SECURE ACCESS LINK:</p>
+                <a href="${downloadUrl}" style="font-weight: bold; color: #000;">Download Strategic Intelligence Report (PDF)</a>
               </div>
-
-              <p style="font-size: 12px; line-height: 1.5;">Notice: This link is generated for <strong>${customerEmail}</strong>. Unauthorized access to this intelligence asset may lead to service termination.</p>
-              <footer style="margin-top: 40px; font-size: 10px; color: #666;">
-                © 2026 FUTURE AUDIT ORG. ALL RIGHTS RESERVED.
-              </footer>
+              <p style="font-size: 12px; color: #666;">Manage your billing via our <a href="https://billing.stripe.com/p/login/6oUfZga9F9S06ys8UW8so00">Secure Portal</a>.</p>
             </div>
           `
         });
