@@ -1,5 +1,4 @@
 User-agent: *
 Disallow: /*.pdf$
 
-Sitemap: https://ai-review-site-nine.vercel.app/sitemap.xml
-
+Sitemap: https://future-audit.org/sitemap.xml
