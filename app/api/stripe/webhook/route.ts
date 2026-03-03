@@ -39,20 +39,26 @@ export async function POST(req: Request) {
         downloadUrl = `${baseUrl}/snapshot-report-x3j5.pdf`;
       }
 
-      if (customerEmail) {
+if (customerEmail) {
         await resend.emails.send({
           from: 'Future Audit Intelligence <info@future-audit.org>',
           to: customerEmail,
-          subject: `[Confidential] Your ${productName} Access`,
+          subject: `[ACTION REQUIRED] Access Your Strategic Intelligence - ${session.id.slice(-6)}`,
           html: `
-            <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 1px solid #eee;">
-              <h2 style="color: #333;">Verification Successful.</h2>
-              <p>Your acquisition of <strong>${productName}</strong> is confirmed.</p>
-              <div style="margin: 20px 0; padding: 20px; background: #f9f9f9; border-left: 4px solid #000;">
-                <p style="margin: 0; font-size: 14px;">SECURE ACCESS LINK:</p>
-                <a href="${downloadUrl}" style="font-weight: bold; color: #000;">Download Strategic Intelligence Report (PDF)</a>
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+              <h1 style="color: #000; border-bottom: 2px solid #000;">INTELLECTUAL ASSET DELIVERY</h1>
+              <p>Your transaction has been finalized. Below is the secure link to your intelligence report.</p>
+              
+              <div style="padding: 20px; background: #f4f4f4; border: 1px solid #ddd; text-align: center;">
+                <a href="${downloadUrl}" style="font-size: 18px; color: #d00; font-weight: bold; text-decoration: none;">▶ DOWNLOAD PDF REPORT (2026 Q2 Edition)</a>
               </div>
-              <p style="font-size: 12px; color: #666;">Manage your billing via our <a href="https://billing.stripe.com/p/login/6oUfZga9F9S06ys8UW8so00">Secure Portal</a>.</p>
+
+              <p style="font-size: 13px; margin-top: 30px;"><strong>Strategic Note:</strong> This document contains time-sensitive compliance data. Immediate review is recommended to mitigate Q2 regulatory risks.</p>
+              
+              <p style="font-size: 11px; color: #888; margin-top: 40px;">
+                Disclaimer: This report is for informational purposes only and does not constitute legal or financial advice. 
+                Manage your subscription: <a href="https://billing.stripe.com/p/login/6oUfZga9F9S06ys8UW8so00">Customer Portal</a>
+              </p>
             </div>
           `
         });
