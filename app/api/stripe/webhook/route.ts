@@ -40,30 +40,41 @@ export async function POST(req: Request) {
         downloadUrl = `${baseUrl}/snapshot-report-x3j5.pdf`;
       }
 
-      if (customerEmail) {
+if (customerEmail) {
+        // Executiveプラン（$900以上）の場合の追加メッセージ
+        const isExecutive = amount >= 900;
+        const executiveNote = isExecutive ? `
+          <div style="margin-top: 20px; padding: 15px; border: 2px solid #d00; background: #fff;">
+            <p style="color: #d00; font-weight: bold; margin: 0;">ACTION REQUIRED: SCHEDULE YOUR AUDIT</p>
+            <p style="font-size: 13px;">As an Executive Member, you are entitled to a 30-minute private audit consultation. Please book your slot here: <a href="YOUR_CALENDLY_LINK">Schedule Session</a></p>
+          </div>
+        ` : "";
+
         await resend.emails.send({
           from: 'Future Audit Intelligence <info@future-audit.org>',
           to: customerEmail,
-          subject: `[ACTION REQUIRED] Access Your Strategic Intelligence - ${session.id.slice(-6)}`,
+          subject: `[CONFIDENTIAL] Asset Access - ${productName}`,
           html: `
-            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #000;">
-              <h1 style="font-size: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">INTELLECTUAL ASSET DELIVERY</h1>
-              <p>Your transaction has been verified. Product: <strong>${productName}</strong></p>
+            <div style="font-family: 'Helvetica', sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 1px solid #000;">
+              <h1 style="font-size: 22px; text-transform: uppercase;">Future Audit Intelligence Lab</h1>
+              <p>Product: <strong>${productName}</strong></p>
               
-              <div style="padding: 25px; background: #000; color: #fff; text-align: center; margin: 20px 0;">
-                <a href="${downloadUrl}" style="font-size: 18px; color: #fff; font-weight: bold; text-decoration: none;">▶ DOWNLOAD PDF REPORT (2026 Q2 Edition)</a>
+              <div style="margin: 20px 0; background: #000; color: #fff; padding: 25px; text-align: center;">
+                <p style="margin-bottom: 10px; font-size: 12px;">ENCRYPTED ASSET LINK:</p>
+                <a href="${downloadUrl}" style="color: #fff; font-size: 18px; font-weight: bold; text-decoration: underline;">DOWNLOAD FULL REPORT (CH. 1-3)</a>
               </div>
 
-              <p style="font-size: 13px;"><strong>Note:</strong> Access will expire in 48 hours for security reasons. Please save your local copy immediately.</p>
-              
-              <p style="font-size: 11px; color: #888; margin-top: 40px; border-top: 1px solid #eee; padding-top: 10px;">
-                © 2026 FUTURE AUDIT ORG. All rights reserved. <br/>
-                Manage billing: <a href="https://billing.stripe.com/p/login/6oUfZga9F9S06ys8UW8so00">Customer Portal</a>
+              ${executiveNote}
+
+              <p style="font-size: 12px; margin-top: 30px; color: #666;">
+                <strong>Security Protocol:</strong> Access tracking is enabled for this link. Unauthorized distribution will terminate your membership.
               </p>
+              <footer style="margin-top: 20px; font-size: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                © 2026 FUTURE AUDIT ORG. | <a href="https://billing.stripe.com/p/login/6oUfZga9F9S06ys8UW8so00">Manage Billing</a>
+              </footer>
             </div>
           `
         });
-        console.log(`✅ Automated Fulfillment for ${customerEmail}`);
       }
     }
     return NextResponse.json({ received: true }, { status: 200 });
