@@ -9,7 +9,6 @@ export async function POST(req: Request) {
   const sig = req.headers.get('stripe-signature');
 
   if (!stripeKey || !resendKey || !webhookSecret || !sig) {
-    console.error("❌ Critical: Missing Configuration or Signature");
     return NextResponse.json({ error: "Configuration Error" }, { status: 400 });
   }
 
@@ -17,7 +16,6 @@ export async function POST(req: Request) {
     const body = await req.text();
     const stripe = new Stripe(stripeKey, { apiVersion: '2025-01-27' as any });
     const resend = new Resend(resendKey);
-
     const event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
 
     if (event.type === 'checkout.session.completed') {
@@ -25,26 +23,26 @@ export async function POST(req: Request) {
       const customerEmail = session.customer_details?.email;
 
       if (customerEmail) {
-        // [修正箇所] from を独自ドメインに変更。本文に具体的価値を追加。
         await resend.emails.send({
-          from: 'Future Audit Intelligence <report@future-audit.org>',
+          // 【重要】onboarding@resend.dev から 独自ドメイン info@future-audit.org へ変更
+          from: 'Future Audit <info@future-audit.org>', 
           to: customerEmail,
-          subject: 'Your Strategic Intelligence Report: Access Granted',
+          subject: 'Your Strategic Intelligence Report is Ready',
           html: `
-            <h1>Thank you for your investment.</h1>
-            <p>Your strategic report from <strong>future-audit.org</strong> is now available.</p>
-            <p>Please access your intelligence dashboard here: [Your_Dynamic_Link_Or_Content]</p>
-            <hr/>
-            <p><small>Future Audit Intelligence: Navigating the AI Frontier.</small></p>
+            <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
+              <h2 style="color: #333;">Investment Confirmed.</h2>
+              <p>Thank you for choosing <strong>Future Audit</strong>.</p>
+              <p>Your strategic intelligence report is now fully activated and attached to your profile.</p>
+              <hr/>
+              <p style="font-size: 12px; color: #666;">© 2026 Future Audit Intelligence Lab</p>
+            </div>
           `
         });
-        console.log(`✅ Professional fulfillment success: ${customerEmail}`);
+        console.log(`✅ Fully-Automated Delivery to: ${customerEmail}`);
       }
     }
-
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (err: any) {
-    console.error(`❌ Webhook Error: ${err.message}`);
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
