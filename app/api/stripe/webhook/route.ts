@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     const resend = new Resend(resendKey);
     const event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
 
-    if (event.type === 'checkout.session.completed') {
+if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       const customerEmail = session.customer_details?.email;
       const amount = session.amount_total ? session.amount_total / 100 : 0;
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       let downloadUrl = "";
       let productName = "";
 
-      // 金額ロジック
+      // 金額に応じたファイルの出し分け（これらがpublicにあることを確認してください）
       if (amount >= 900) {
         productName = "Executive DAO Sovereign";
         downloadUrl = `${baseUrl}/dao-onboarding-8k2z.pdf`;
@@ -40,41 +40,33 @@ export async function POST(req: Request) {
         downloadUrl = `${baseUrl}/snapshot-report-x3j5.pdf`;
       }
 
-if (customerEmail) {
-        // Executiveプラン（$900以上）の場合の追加メッセージ
-        const isExecutive = amount >= 900;
-        const executiveNote = isExecutive ? `
-          <div style="margin-top: 20px; padding: 15px; border: 2px solid #d00; background: #fff;">
-            <p style="color: #d00; font-weight: bold; margin: 0;">ACTION REQUIRED: SCHEDULE YOUR AUDIT</p>
-            <p style="font-size: 13px;">As an Executive Member, you are entitled to a 30-minute private audit consultation. Please book your slot here: <a href="YOUR_CALENDLY_LINK">Schedule Session</a></p>
-          </div>
-        ` : "";
-
+      if (customerEmail) {
         await resend.emails.send({
           from: 'Future Audit Intelligence <info@future-audit.org>',
           to: customerEmail,
-          subject: `[CONFIDENTIAL] Asset Access - ${productName}`,
+          subject: `[CONFIDENTIAL] Access Granted: ${productName}`,
           html: `
-            <div style="font-family: 'Helvetica', sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 1px solid #000;">
-              <h1 style="font-size: 22px; text-transform: uppercase;">Future Audit Intelligence Lab</h1>
+            <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 1px solid #000; background: #fff;">
+              <h1 style="font-size: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">ORDER VERIFICATION SUCCESSFUL</h1>
               <p>Product: <strong>${productName}</strong></p>
+              <p>Thank you for your investment. Your strategic intelligence assets are now ready for download.</p>
               
-              <div style="margin: 20px 0; background: #000; color: #fff; padding: 25px; text-align: center;">
-                <p style="margin-bottom: 10px; font-size: 12px;">ENCRYPTED ASSET LINK:</p>
-                <a href="${downloadUrl}" style="color: #fff; font-size: 18px; font-weight: bold; text-decoration: underline;">DOWNLOAD FULL REPORT (CH. 1-3)</a>
+              <div style="margin: 20px 0; background: #000; padding: 25px; text-align: center;">
+                <a href="${downloadUrl}" style="color: #fff; font-size: 16px; font-weight: bold; text-decoration: none; border: 1px solid #fff; padding: 10px 20px;">▶ DOWNLOAD SECURE PDF</a>
               </div>
 
-              ${executiveNote}
-
-              <p style="font-size: 12px; margin-top: 30px; color: #666;">
-                <strong>Security Protocol:</strong> Access tracking is enabled for this link. Unauthorized distribution will terminate your membership.
+              <p style="font-size: 12px; color: #666; margin-top: 30px;">
+                Note: This link is unique to <strong>${customerEmail}</strong>. Unauthorized distribution will lead to immediate account termination.
+                <br/><br/>
+                Need help? Contact: info@future-audit.org
               </p>
-              <footer style="margin-top: 20px; font-size: 10px; border-top: 1px solid #eee; padding-top: 10px;">
-                © 2026 FUTURE AUDIT ORG. | <a href="https://billing.stripe.com/p/login/6oUfZga9F9S06ys8UW8so00">Manage Billing</a>
+              <footer style="margin-top: 20px; font-size: 10px; color: #999; border-top: 1px solid #eee; padding-top: 10px;">
+                © 2026 FUTURE AUDIT ORG. | <a href="https://billing.stripe.com/p/login/6oUfZga9F9S06ys8UW8so00">Customer Portal</a>
               </footer>
             </div>
           `
         });
+        console.log(`✅ Automated Fulfillment to: ${customerEmail}`);
       }
     }
     return NextResponse.json({ received: true }, { status: 200 });
