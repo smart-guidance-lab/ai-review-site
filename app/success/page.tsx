@@ -7,39 +7,45 @@ export default function SuccessPage() {
       justifyContent: 'center',
       backgroundColor: '#000',
       color: '#fff',
-      fontFamily: 'sans-serif',
+      fontFamily: 'Courier New, Courier, monospace',
       padding: '20px'
     }}>
       <div style={{
-        maxWidth: '500px',
+        maxWidth: '600px',
         width: '100%',
         border: '1px solid #333',
-        padding: '40px',
+        padding: '50px',
         textAlign: 'center'
       }}>
-        <h1 style={{ fontSize: '24px', letterSpacing: '2px', marginBottom: '20px' }}>TRANSACTION VERIFIED</h1>
-        <div style={{ height: '2px', backgroundColor: '#fff', margin: '20px 0' }}></div>
-        <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '30px' }}>
-          Thank you for your investment in <strong>Future Audit Intelligence</strong>.
+        <h1 style={{ fontSize: '28px', letterSpacing: '4px', marginBottom: '20px', fontWeight: 'bold' }}>ACCESS GRANTED</h1>
+        <div style={{ height: '4px', backgroundColor: '#fff', margin: '30px 0' }}></div>
+        
+        <p style={{ fontSize: '18px', color: '#ccc', marginBottom: '40px' }}>
+          Your acquisition of <strong>Future Audit Strategic Assets</strong> has been verified.
         </p>
-        <div style={{ backgroundColor: '#111', padding: '20px', marginBottom: '30px', border: '1px dashed #444' }}>
-          <p style={{ margin: 0, fontSize: '14px' }}>
-            A secure download link has been dispatched to your registered email address.
-            Please check your inbox (including <strong>spam/junk</strong> folders) immediately.
+
+        <div style={{ backgroundColor: '#111', padding: '25px', marginBottom: '30px', border: '1px dashed #555' }}>
+          <p style={{ margin: 0, fontSize: '15px', lineHeight: '1.8' }}>
+            A secure link to your intelligence report (PDF) has been sent to your email.<br/>
+            <strong>Check your inbox & spam folder immediately.</strong>
           </p>
         </div>
-        <p style={{ fontSize: '12px', color: '#888' }}>
-          Assets are encrypted and tracked for security purposes. Access will expire in 48 hours.
+
+        <p style={{ fontSize: '12px', color: '#666', marginBottom: '40px' }}>
+          If you do not receive the email within 10 minutes, please contact:<br/>
+          <span style={{ color: '#aaa' }}>info@future-audit.org</span>
         </p>
-        <a href="/" style={{
-          display: 'inline-block',
-          marginTop: '30px',
-          color: '#fff',
-          textDecoration: 'underline',
-          fontSize: '14px'
-        }}>
-          Return to Intelligence Lab
-        </a>
+
+        <div style={{ borderTop: '1px solid #222', paddingTop: '30px' }}>
+          <a href="/" style={{
+            color: '#fff',
+            textDecoration: 'none',
+            fontSize: '12px',
+            border: '1px solid #fff',
+            padding: '10px 20px',
+            letterSpacing: '1px'
+          }}>RETURN TO LAB</a>
+        </div>
       </div>
     </div>
   );
