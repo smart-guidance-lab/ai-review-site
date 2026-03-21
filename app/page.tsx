@@ -19,11 +19,10 @@ export default function Home() {
       .sort((a, b) => b.mtime - a.mtime);
   }
 
-  // 【重要】ここにあなたの実際のStripeリンクを貼り付けてください
   const pricing = [
-    { title: "Intelligence Snapshot", price: "$47", url: "https://buy.stripe.com/6oUcN41D9ggo0a4efg8so03", desc: "Global AI Compliance Report (CH 1-3)" },
-    { title: "Strategic Brief", price: "$297", url: "https://buy.stripe.com/3cI00i95Bfck2ic7QS8so04", desc: "Quarterly Intelligence & Monthly Updates" },
-    { title: "Executive DAO", price: "$980", url: "https://buy.stripe.com/6oU14m95B5BK8GA5IK8so05", desc: "Private Audit Session & Strategic Access" }
+    { title: "Intelligence Snapshot", price: "$47", url: "https://buy.stripe.com/あなたの47ドルリンク", desc: "2026 Q2 Full Compliance Report (CH 1-3)" },
+    { title: "Strategic Brief", price: "$297", url: "https://buy.stripe.com/あなたの297ドルリンク", desc: "Quarterly Intelligence & Monthly Updates" },
+    { title: "Executive DAO", price: "$980", url: "https://buy.stripe.com/あなたの980ドルリンク", desc: "Private Audit Session & Strategic Access" }
   ];
 
   return (
@@ -60,8 +59,12 @@ export default function Home() {
         ))}
       </div>
 
-      <footer style={{ padding: '3rem 2rem', textAlign: 'center', fontSize: '0.7rem', color: '#999', letterSpacing: '1px' }}>
-        © 2026 AI INSIGHT GLOBAL. ALL ASSETS ENCRYPTED. | <a href="https://billing.stripe.com/p/login/6oUfZga9F9S06ys8UW8so00" style={{ color: '#999' }}>Customer Portal</a>
+      <footer style={{ padding: '4rem 2rem', textAlign: 'center', fontSize: '0.7rem', color: '#666', letterSpacing: '1px', lineHeight: '2' }}>
+        <p>© 2026 AI INSIGHT GLOBAL. ALL ASSETS ENCRYPTED.</p>
+        <p style={{ fontSize: '0.6rem' }}>
+          Operator: AI INSIGHT GLOBAL Lab | Contact: info@future-audit.org<br/>
+          Legal: Digital assets are non-refundable once delivered. | <a href="https://billing.stripe.com/p/login/6oUfZga9F9S06ys8UW8so00" style={{ color: '#666' }}>Customer Portal</a>
+        </p>
       </footer>
 
       <style dangerouslySetInnerHTML={{ __html: `.post-card:hover { background: #fafafa !important; }` }} />
