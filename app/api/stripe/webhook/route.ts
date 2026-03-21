@@ -32,13 +32,13 @@ export async function POST(req: Request) {
 
       if (amount >= 900) {
         productName = "Executive DAO Sovereign";
-        downloadUrl = `${baseUrl}/dao-onboarding-8k2z.pdf`;
+        downloadUrl = `${baseUrl}/dao.pdf`;
       } else if (amount >= 200) {
         productName = "Strategic Intelligence MRR";
-        downloadUrl = `${baseUrl}/strategic-brief-q9v1.pdf`;
+        downloadUrl = `${baseUrl}/brief.pdf`;
       } else {
         productName = "Intelligence Snapshot";
-        downloadUrl = `${baseUrl}/snapshot-report-x3j5.pdf`;
+        downloadUrl = `${baseUrl}/snapshot.pdf`;
       }
 
       if (customerEmail) {
