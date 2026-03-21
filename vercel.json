@@ -1,6 +1,12 @@
 {
-  "buildCommand": "next build",
-  "installCommand": "npm install --legacy-peer-deps",
-  "framework": "nextjs",
-  "outputDirectory": ".next"
+  "headers": [
+    {
+      "source": "/(.*).pdf",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Content-Type", "value": "application/pdf" },
+        { "key": "Content-Disposition", "value": "inline" }
+      ]
+    }
+  ]
 }
