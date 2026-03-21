@@ -3,12 +3,10 @@ import { Resend } from 'resend';
 import Stripe from 'stripe';
 
 export async function POST(req: Request) {
-  const stripeKey = process.env.STRIPE_SECRET_KEY; // ここに sk_live が入る
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
   const resendKey = process.env.RESEND_API_KEY;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const sig = req.headers.get('stripe-signature');
-  
-  // ドメイン浸透までの安全策
   const baseUrl = "https://ai-review-site-nine.vercel.app"; 
 
   if (!stripeKey || !resendKey || !webhookSecret || !sig) {
@@ -30,6 +28,7 @@ export async function POST(req: Request) {
       let downloadUrl = "";
       let productName = "";
 
+      // シンプルなファイル名に変更
       if (amount >= 900) {
         productName = "Executive DAO Sovereign";
         downloadUrl = `${baseUrl}/dao.pdf`;
@@ -42,7 +41,7 @@ export async function POST(req: Request) {
       }
 
       if (customerEmail) {
-        const { data, error } = await resend.emails.send({
+        await resend.emails.send({
           from: 'Future Audit Intelligence <info@future-audit.org>',
           to: customerEmail,
           subject: `[CONFIDENTIAL] Access Granted: ${productName}`,
@@ -53,13 +52,11 @@ export async function POST(req: Request) {
               <div style="margin: 30px 0; background: #000; padding: 25px; text-align: center;">
                 <a href="${downloadUrl}" style="color: #fff; font-size: 16px; font-weight: bold; text-decoration: none; border: 1px solid #fff; padding: 10px 20px;">▶ DOWNLOAD PDF REPORT</a>
               </div>
-              <p style="font-size: 11px; color: #888;">© 2026 AI INSIGHT GLOBAL. Link expires in 48h.</p>
+              <p style="font-size: 11px; color: #888;">Note: Link is secured. Download and save locally.</p>
             </div>
           `
         });
-        
-        if (error) console.error("❌ Resend Error:", error);
-        else console.log(`✅ Success: Email sent to ${customerEmail}`);
+        console.log(`✅ Success: Email sent to ${customerEmail}`);
       }
     }
     return NextResponse.json({ received: true }, { status: 200 });
